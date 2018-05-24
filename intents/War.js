@@ -21,6 +21,11 @@ module.exports = {
       return;
     }
 
+    // First burn three
+    game.deck.shift();
+    game.deck.shift();
+    game.deck.shift();
+
     game.bankroll -= game.bet;
     game.player.push(game.deck.shift());
     game.dealer.push(game.deck.shift());
@@ -29,8 +34,8 @@ module.exports = {
         .replace('{0}', utils.sayCard(this, game.player[1]))
         .replace('{1}', utils.sayCard(this, game.dealer[1]));
 
-    // OK, who won?
-    if ((game.player[1].rank == 1) || (game.player[1].rank >= game.dealer[1].rank)) {
+    // OK, who won (player wins ties)
+    if (game.player[1].rank >= game.dealer[1].rank) {
       // You won!
       speech += this.t('BET_WINNER');
       game.bankroll += 2 * game.bet;

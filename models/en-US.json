@@ -1,0 +1,115 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "casino war",
+      "intents": [
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.MoreIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NavigateSettingsIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NextIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.PageUpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.PageDownIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.PreviousIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.ScrollRightIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.ScrollDownIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.ScrollLeftIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.ScrollUpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.RepeatIntent",
+          "samples": []
+        },
+        {
+          "name": "HighScoreIntent",
+          "slots": [],
+          "samples": [
+            "read high scores",
+            "tell me high scores",
+            "what are the high scores",
+            "what is the leader board",
+            "read leader board",
+            "say high scores",
+            "say leader board"
+
+          ]
+        },
+        {
+          "name": "BetIntent",
+          "slots": [
+            {
+              "name": "Amount",
+              "type": "AMAZON.NUMBER"
+            }
+          ],
+          "samples": [
+            "bet {Amount}",
+            "play {Amount}",
+            "bet for {Amount}",
+            "play for {Amount}",
+            "bet {Amount} dollars",
+            "play {Amount} dollars",
+            "bet for {Amount} dollars",
+            "play for {Amount} dollars",
+            "bet {Amount} dollar",
+            "play {Amount} dollar",
+            "bet for {Amount} dollar",
+            "play for {Amount} dollar",
+            "do bet",
+            "do deal",
+            "deal",
+            "bet"
+          ]
+        }
+      ],
+      "types": []
+    }
+  }
+}

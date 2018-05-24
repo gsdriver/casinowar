@@ -39,7 +39,7 @@ module.exports = {
       reprompt = this.t('BET_INVALID_REPROMPT');
     } else if (amount > game.bankroll) {
       if (game.bankroll >= game.rules.minBet) {
-        amount = game.rules.minBet;
+        amount = game.bankroll;
       } else {
         // Oops, you can't bet this much
         speech = this.t('BET_EXCEEDS_BANKROLL').replace('{0}', game.bankroll);
@@ -53,6 +53,7 @@ module.exports = {
     }
 
     // Place the bet and deal the cards
+    const format = (game.bet == amount) ? this.t('BET_CARDS') : this.t('BET_CARDS_SAYBET');
     game.bet = amount;
     game.bankroll -= game.bet;
     game.timestamp = Date.now();
@@ -65,9 +66,10 @@ module.exports = {
     game.player = [game.deck.shift()];
     game.dealer = [game.deck.shift()];
 
-    speech = this.t('BET_CARDS')
+    speech = format
         .replace('{0}', utils.sayCard(this, game.player[0]))
-        .replace('{1}', utils.sayCard(this, game.dealer[0]));
+        .replace('{1}', utils.sayCard(this, game.dealer[0]))
+        .replace('{2}', game.bet);
 
     // If these are the same rank - you have a war!
     if (game.player[0].rank == game.dealer[0].rank) {
@@ -76,7 +78,7 @@ module.exports = {
       reprompt = this.t('BET_REPROMPT_WAR');
     } else {
       // OK, who won?
-      if ((game.player[0].rank == 1) || (game.player[0].rank > game.dealer[0].rank)) {
+      if (game.player[0].rank > game.dealer[0].rank) {
         // You won!
         speech += this.t('BET_WINNER');
         game.bankroll += 2 * game.bet;

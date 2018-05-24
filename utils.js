@@ -144,7 +144,7 @@ module.exports = {
     game.deck = [];
     const suits = ['C', 'D', 'H', 'S'];
     for (i = 0; i < game.rules.numberOfDecks; i++) {
-      for (rank = 1; rank <= 13; rank++) {
+      for (rank = 2; rank <= 14; rank++) {
         suits.map((item) => {
           game.deck.push({'rank': rank, 'suit': item});
         });
@@ -210,10 +210,19 @@ function buildDisplayTemplate(context, callback) {
     context.attributes.display = true;
     const start = Date.now();
     const game = context.attributes[context.attributes.currentGame];
+    let nextCards;
+
+    if ((game.player.length == 0) || (game.player[0].rank !== game.dealer[0].rank)) {
+      nextCards = game.deck.slice(0, 2);
+    } else {
+      // We're going to burn three if there is a war (assume so)
+      nextCards = game.deck.slice(3, 5);
+    }
+
     const formData = {
       dealer: JSON.stringify(game.dealer),
       player: JSON.stringify(game.player),
-      nextCards: JSON.stringify(game.deck.slice(0, 4)),
+      nextCards: JSON.stringify(nextCards),
     };
     if (game.activePlayer == 'none') {
       formData.showHoleCard = 'true';
@@ -233,7 +242,7 @@ function buildDisplayTemplate(context, callback) {
         const imageUrl = JSON.parse(body).file;
         const end = Date.now();
         console.log('Drawing table took ' + (end - start) + ' ms');
-
+console.log(imageUrl);
         // Use this as the background image
         const builder = new Alexa.templateBuilders.BodyTemplate6Builder();
         const template = builder.setTitle('')
@@ -248,14 +257,5 @@ function buildDisplayTemplate(context, callback) {
   } else {
     // Not a display device
     callback();
-  }
-}
-
-function roundPlayers(context, playerCount) {
-  if (playerCount < 200) {
-    return playerCount;
-  } else {
-    // "Over" to the nearest hundred
-    return context.t('MORE_THAN_PLAYERS').replace('{0}', 100 * Math.floor(playerCount / 100));
   }
 }
