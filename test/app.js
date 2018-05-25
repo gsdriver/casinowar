@@ -6,6 +6,7 @@ const AWS = require('aws-sdk');
 AWS.config.update({region: 'us-east-1'});
 const dynamodb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
 const USERID = 'not-amazon';
+const LOCALE = 'en-CA';
 
 function BuildEvent(argv)
 {
@@ -36,7 +37,7 @@ function BuildEvent(argv)
     "request": {
       "type": "IntentRequest",
       "requestId": "EdwRequestId.26405959-e350-4dc0-8980-14cdc9a4e921",
-      "locale": "en-US",
+      "locale": LOCALE,
       "timestamp": "2016-11-03T21:31:08Z",
       "intent": {}
     },
@@ -84,7 +85,7 @@ function BuildEvent(argv)
     "request": {
       "type": "LaunchRequest",
       "requestId": "EdwRequestId.26405959-e350-4dc0-8980-14cdc9a4e921",
-      "locale": "en-US",
+      "locale": LOCALE,
       "timestamp": "2016-11-03T21:31:08Z",
       "intent": {}
     },
