@@ -22,7 +22,7 @@ module.exports = {
       const game = this.attributes[this.attributes.currentGame];
 
       // Place the bet and deal the cards
-      const format = (game.bet == amount) ? this.t('BET_CARDS') : this.t('BET_CARDS_SAYBET');
+      const sayBet = (game.bet !== amount);
       game.bet = amount;
       game.bankroll -= game.bet;
 
@@ -42,11 +42,7 @@ module.exports = {
       }
       game.player = [game.deck.shift()];
       game.dealer = [game.deck.shift()];
-
-      speech = format
-          .replace('{0}', utils.sayCard(this, game.player[0]))
-          .replace('{1}', utils.sayCard(this, game.dealer[0]))
-          .replace('{2}', game.bet);
+      speech = utils.sayDealtCards(this, game.player[0], game.dealer[0], (sayBet) ? game.bet : undefined);
 
       // If these are the same rank - you have a war!
       if (game.player[0].rank == game.dealer[0].rank) {

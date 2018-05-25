@@ -204,6 +204,30 @@ module.exports = {
 
     callback(speech, reprompt);
   },
+  sayDealtCards: function(context, playerCard, dealerCard, bet) {
+    const format = (bet ? context.t('BET_CARDS_SAYBET') : context.t('BET_CARDS'));
+    let playerText;
+    let dealerText;
+
+    if (playerCard.rank > 10) {
+      playerText = pickRandomOption(context, 'GOOD_PLAYER_CARD');
+    } else if (playerCard.rank < 5) {
+      playerText = pickRandomOption(context, 'BAD_PLAYER_CARD');
+    } else {
+      playerText = pickRandomOption(context, 'NORMAL_PLAYER_CARD');
+    }
+
+    if ((dealerCard.rank > playerCard.rank) && (playerCard.rank > 10)) {
+      dealerText = pickRandomOption(context, 'DEALER_TOUGH_BEAT');
+    } else {
+      dealerText = pickRandomOption(context, 'DEALER_CARD');
+    }
+
+    return format
+        .replace('{0}', playerText.replace('{0}', module.exports.sayCard(context, playerCard)))
+        .replace('{1}', dealerText.replace('{0}', module.exports.sayCard(context, dealerCard)))
+        .replace('{2}', bet);
+  },
   getBetAmount: function(context, callback) {
     let reprompt;
     let speech;
@@ -306,5 +330,22 @@ function roundPlayers(context, playerCount) {
   } else {
     // "Over" to the nearest hundred
     return context.t('MORE_THAN_PLAYERS').replace('{0}', 100 * Math.floor(playerCount / 100));
+  }
+}
+
+function pickRandomOption(context, res) {
+  const game = context.attributes[context.attributes.currentGame];
+
+  if (res && context.t(res)) {
+    const options = context.t(res).split('|');
+    const randomValue = seedrandom(context.event.session.user.userId + (game.timestamp ? game.timestamp : ''))();
+    const choice = Math.floor(randomValue * options.length);
+    if (choice == options.length) {
+      choice--;
+    }
+
+    return options[choice];
+  } else {
+    return undefined;
   }
 }

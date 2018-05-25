@@ -34,10 +34,7 @@ module.exports = {
     game.bankroll -= game.bet;
     game.player.push(game.deck.shift());
     game.dealer.push(game.deck.shift());
-
-    speech = this.t('BET_CARDS')
-        .replace('{0}', utils.sayCard(this, game.player[1]))
-        .replace('{1}', utils.sayCard(this, game.dealer[1]));
+    speech = utils.sayDealtCards(this, game.player[1], game.dealer[1]);
 
     // OK, who won (player wins ties)
     if (game.player[1].rank >= game.dealer[1].rank) {
