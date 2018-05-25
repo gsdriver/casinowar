@@ -25,8 +25,8 @@ const resources = {
       // From HighScore.js
       'HIGHSCORE_REPROMPT': 'What else can I help you with?',
       // From Launch.js
-      'LAUNCH_WELCOME': 'Welcome to Casino War. Say bet to play.',
-      'LAUNCH_WELCOME_BACK': 'Welcome back to Casino War. You have ${0}. Say bet to play.',
+      'LAUNCH_WELCOME': 'Welcome to Casino War. ',
+      'LAUNCH_WELCOME_BACK': 'Welcome back to Casino War. You have ${0}. ',
       'LAUNCH_REPROMPT': 'Say bet to play.',
       // From Repeat.js
       'READ_BANKROLL': 'You have ${0}. ',

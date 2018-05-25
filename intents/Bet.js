@@ -14,12 +14,10 @@ module.exports = {
     let speech;
     let amount;
     const game = this.attributes[this.attributes.currentGame];
-    const amountSlot = this.event.request.intent.slots.Amount;
 
-    // Default to minimum bet
-    if (amountSlot && amountSlot.value) {
-      // If the bet amount isn't an integer, we'll use the default value (1 unit)
-      amount = parseInt(amountSlot.value);
+    if (this.event.request.intent.slots && this.event.request.intent.slots.Amount
+      && this.event.request.intent.slots.Amount.value) {
+      amount = parseInt(this.event.request.intent.slots.Amount.value);
     } else if (game.bet) {
       amount = game.bet;
     } else {
@@ -58,6 +56,7 @@ module.exports = {
     game.bankroll -= game.bet;
     game.timestamp = Date.now();
     game.rounds = (game.rounds + 1) || 1;
+    game.specialState = undefined;
 
     // If fewer than 20 cards, shuffle
     if (game.deck.length < 20) {

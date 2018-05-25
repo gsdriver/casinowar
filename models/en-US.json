@@ -78,7 +78,6 @@
             "read leader board",
             "say high scores",
             "say leader board"
-
           ]
         },
         {
@@ -107,6 +106,14 @@
             "deal",
             "bet"
           ]
+        },
+        {
+          "name": "AMAZON.YesIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NoIntent",
+          "samples": []
         }
       ],
       "types": []

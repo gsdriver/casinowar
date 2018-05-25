@@ -55,6 +55,7 @@ module.exports = {
 
     // You lose half your bet
     game.bankroll += Math.floor(game.bet / 2);
+    game.specialState = 'surrender';
     speech = this.t('WAR_SURRENDER');
     if ((game.bankroll < game.rules.minBet) && game.rules.canReset) {
       game.bankroll = game.startingBankroll;
