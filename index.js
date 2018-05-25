@@ -13,6 +13,7 @@ const Exit = require('./intents/Exit');
 const Repeat = require('./intents/Repeat');
 const HighScore = require('./intents/HighScore');
 const War = require('./intents/War');
+const SideBet = require('./intents/SideBet');
 const resources = require('./resources');
 const utils = require('./utils');
 const request = require('request');
@@ -48,6 +49,8 @@ const playingHandlers = Alexa.CreateStateHandler('PLAYING', {
   },
   'LaunchRequest': Launch.handleIntent,
   'BetIntent': Bet.handleIntent,
+  'PlaceSideBetIntent': SideBet.handlePlaceIntent,
+  'RemoveSideBetIntent': SideBet.handleRemoveIntent,
   'HighScoreIntent': HighScore.handleIntent,
   'AMAZON.RepeatIntent': Repeat.handleIntent,
   'AMAZON.FallbackIntent': Repeat.handleIntent,

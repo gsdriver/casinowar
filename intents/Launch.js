@@ -26,7 +26,7 @@ module.exports = {
     if (this.handler.state == 'ATWAR') {
       // Read the hand as well
       utils.readHand(this, false, (hand, reprompt) => {
-        speech += hand;
+        speech += (hand + reprompt);
         utils.emitResponse(this, null, null, speech, reprompt);
       });
     } else {

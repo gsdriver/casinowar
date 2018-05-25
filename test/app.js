@@ -11,6 +11,8 @@ function BuildEvent(argv)
 {
   // Templates that can fill in the intent
   const bet = {'name': 'BetIntent', 'slots': {'Amount': {'name': 'Amount', 'value': ''}}};
+  const placesidebet = {'name': 'PlaceSideBetIntent', 'slots': {'Amount': {'name': 'Amount', 'value': ''}}};
+  const removesidebet = {'name': 'RemoveSideBetIntent', 'slots': {}};
   const reset = {'name': 'ResetIntent', 'slots': {}};
   const yes = {'name': 'AMAZON.YesIntent', 'slots': {}};
   const no = {'name': 'AMAZON.NoIntent', 'slots': {}};
@@ -134,8 +136,15 @@ function BuildEvent(argv)
     if (argv.length > 3) {
       bet.slots.Amount.value = argv[3];
     }
+  } else if (argv[2] == 'placesidebet') {
+    lambda.request.intent = placesidebet;
+    if (argv.length > 3) {
+      placesidebet.slots.Amount.value = argv[3];
+    }
   } else if (argv[2] == 'launch') {
     return openEvent;
+  } else if (argv[2] == 'removesidebet') {
+    lambda.request.intent = removesidebet;
   } else if (argv[2] == 'highscore') {
     lambda.request.intent = highScore;
   } else if (argv[2] == 'help') {

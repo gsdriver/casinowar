@@ -78,6 +78,7 @@ module.exports = {
         minBet: 5,              // Minimum bet
         maxBet: 1000,           // Maximum bet
         numberOfDecks: 6,       // Number of decks
+        tieBonus: 1,            // Additional amount paid on tie after war
         canReset: true,         // Can the game be reset
       },
       player: [],
@@ -181,7 +182,7 @@ module.exports = {
   },
   readHand: function(context, readBankroll, callback) {
     let speech = '';
-    let reprompt;
+    let reprompt = '';
     const game = context.attributes[context.attributes.currentGame];
 
     if (readBankroll) {
@@ -201,8 +202,45 @@ module.exports = {
       reprompt = context.t('BET_PLAY_AGAIN');
     }
 
-    speech += reprompt;
     callback(speech, reprompt);
+  },
+  getBetAmount: function(context, callback) {
+    let reprompt;
+    let speech;
+    let amount;
+    const game = context.attributes[context.attributes.currentGame];
+
+    if (context.event.request.intent.slots && context.event.request.intent.slots.Amount
+      && context.event.request.intent.slots.Amount.value) {
+      amount = parseInt(context.event.request.intent.slots.Amount.value);
+    } else if (game.bet) {
+      amount = game.bet;
+    } else {
+      amount = game.minBet;
+    }
+
+    // If we didn't get the amount, just make it a minimum bet
+    if (isNaN(amount) || (amount == 0)) {
+      amount = game.rules.minBet;
+    }
+
+    if (amount > game.rules.maxBet) {
+      speech = context.t('BET_EXCEEDS_MAX').replace('{0}', game.rules.maxBet);
+      reprompt = context.t('BET_INVALID_REPROMPT');
+    } else if (amount < game.rules.minBet) {
+      speech = context.t('BET_LESSTHAN_MIN').replace('{0}', game.rules.minBet);
+      reprompt = context.t('BET_INVALID_REPROMPT');
+    } else if (amount > game.bankroll) {
+      if (game.bankroll >= game.rules.minBet) {
+        amount = game.bankroll;
+      } else {
+        // Oops, you can't bet this much
+        speech = context.t('BET_EXCEEDS_BANKROLL').replace('{0}', game.bankroll);
+        reprompt = context.t('BET_INVALID_REPROMPT');
+      }
+    }
+
+    callback(amount, speech, reprompt);
   },
 };
 

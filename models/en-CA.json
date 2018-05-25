@@ -4,10 +4,6 @@
       "invocationName": "casino war",
       "intents": [
         {
-          "name": "AMAZON.FallbackIntent",
-          "samples": []
-        },
-        {
           "name": "AMAZON.CancelIntent",
           "samples": []
         },
