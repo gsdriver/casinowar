@@ -45,7 +45,20 @@ module.exports = {
           } else {
             ads.running.forEach((ad) => {
               // Is this ad appropriate for this locale (no locale means all locales)
-              if (!ad.locale || (ad.locale == locale) || (ad.locale == languages[0])) {
+              let runInLocale;
+              if (ad.locale) {
+                const localesToRun = ad.locale.split('|');
+                localesToRun.forEach((loc) => {
+                  if ((loc == locale) || (loc == languages[0])) {
+                    runInLocale = true;
+                  }
+                });
+              } else {
+                // OK to run globally
+                runInLocale = true;
+              }
+
+              if (runInLocale) {
                 // Did we already show this ad?  If not, that's the one we'll pick
                 if (!adToRun) {
                   // If there is a condition, make sure that it's met
