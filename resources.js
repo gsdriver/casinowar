@@ -9,7 +9,7 @@ const common = {
   'BET_INVALID_AMOUNT': 'I\'m sorry, {0} is not a valid amount to bet.',
   'BET_INVALID_REPROMPT': 'What else can I help you with?',
   'BET_CARDS': '<audio src=\"https://s3-us-west-2.amazonaws.com/alexasoundclips/dealcard.mp3\"/> {0} <audio src=\"https://s3-us-west-2.amazonaws.com/alexasoundclips/dealcard.mp3\"/> and {1}. ',
-  'BET_SAME_CARD': 'It\'s a tie! ',
+  'BET_SAME_CARD': 'It\'s a tie! |Looks like a war |It\'s a tie! |<audio src="https://s3-us-west-2.amazonaws.com/alexasoundclips/war/war1.mp3"/> |<audio src="https://s3-us-west-2.amazonaws.com/alexasoundclips/war/war2.mp3"/> |<audio src="https://s3-us-west-2.amazonaws.com/alexasoundclips/war/war3.mp3"/> |<audio src="https://s3-us-west-2.amazonaws.com/alexasoundclips/war/war4.mp3"/> ',
   'BET_WINNER': 'You won! ',
   'BET_LOSER': 'You lose! ',
   'BET_REPROMPT_WAR': 'Say yes to go to war or no to surrender. ',
@@ -48,7 +48,7 @@ const dollar = {
   'BET_LESSTHAN_MIN': 'Sorry, this bet is less than the minimum bet of ${0}.',
   'BET_EXCEEDS_BANKROLL': 'Sorry, this bet exceeds your bankroll of ${0}.',
   'BET_CARDS_SAYBET': 'You bet ${2} <audio src=\"https://s3-us-west-2.amazonaws.com/alexasoundclips/dealcard.mp3\"/> {0} <audio src=\"https://s3-us-west-2.amazonaws.com/alexasoundclips/dealcard.mp3\"/> and {1}. ',
-  'BET_SAME_CARD_SIDEBET': 'It\'s a tie and you won ${0} from your side bet! ',
+  'BET_SAME_CARD_SIDEBET': 'You won ${0} from your side bet! ',
   'RESET_BANKROLL': 'You do not have enough to place the minimum bet. Resetting bankroll to ${0}. ',
   // From Help.js
   'HELP_CARD_TEXT': 'You can bet between ${0} and ${1} per round by saying BET and the amount you want to bet.\nYou and the dealer are both dealt one card - high card wins.\nIf it\'s a tie, you can either double your bet and go to war or surrender your hand. If you go to war, the dealer will burn three cards from the deck, then deal a card to both players. High card wins, with the player winning on ties. If you win, you will win your original bet. If the dealer wins, you lose the doubled bet. If you surrender your hand, you lose half your bet and the round ends.\nYou can place a side bet from ${2} to ${3} by saying PLACE SIDE BET. This bet wins if the first two cards are a tie and pays 10-1. The side bet remains in play until you say REMOVE SIDE BET.\nSay READ HIGH SCORES to hear the leader board.\nGood luck!',
@@ -74,7 +74,7 @@ const pound = {
   'BET_LESSTHAN_MIN': 'Sorry, this bet is less than the minimum bet of £{0}.',
   'BET_EXCEEDS_BANKROLL': 'Sorry, this bet exceeds your bankroll of £{0}.',
   'BET_CARDS_SAYBET': 'You bet £{2} <audio src=\"https://s3-us-west-2.amazonaws.com/alexasoundclips/dealcard.mp3\"/> {0} <audio src=\"https://s3-us-west-2.amazonaws.com/alexasoundclips/dealcard.mp3\"/> and {1}. ',
-  'BET_SAME_CARD_SIDEBET': 'It\'s a tie and you won £{0} from your side bet! ',
+  'BET_SAME_CARD_SIDEBET': 'You won £{0} from your side bet! ',
   'RESET_BANKROLL': 'You do not have enough to place the minimum bet. Resetting bankroll to £{0}. ',
   // From Help.js
   'HELP_CARD_TEXT': 'You can bet between £{0} and £{1} per round by saying BET and the amount you want to bet.\nYou and the dealer are both dealt one card - high card wins.\nIf it\'s a tie, you can either double your bet and go to war or surrender your hand. If you go to war, the dealer will burn three cards from the deck, then deal a card to both players. High card wins, with the player winning on ties. If you win, you will win your original bet. If the dealer wins, you lose the doubled bet. If you surrender your hand, you lose half your bet and the round ends.\nYou can place a side bet from £{2} to £{3} by saying PLACE SIDE BET. This bet wins if the first two cards are a tie and pays 10-1. The side bet remains in play until you say REMOVE SIDE BET.\nSay READ HIGH SCORES to hear the leader board.\nGood luck!',
@@ -96,9 +96,9 @@ const pound = {
 // Informal strings - using me and I
 const informal = {
   // From Bet.js
-  'GOOD_PLAYER_CARD': 'You got {0}|You got {0}|Ooh a {0}|{0} nice',
+  'GOOD_PLAYER_CARD': 'You got {0}|You got {0}|Look a {0}|{0} <break time=\'200ms\'/> nice',
   'NORMAL_PLAYER_CARD': 'You got {0}|You got {0}|Here\'s a {0} for you',
-  'BAD_PLAYER_CARD': 'You got {0}|You got {0}|{0} sorry|sorry it\'s a {0}',
+  'BAD_PLAYER_CARD': 'You got {0}|You got {0}|{0} <break time=\'400ms\'/> sorry|sorry it\'s a {0}',
   'DEALER_CARD': 'I got {0}|I got {0}|{0} for me',
   'DEALER_TOUGH_BEAT': 'I got {0}|I got {0}|Ouch a {0} for me|{0} for me <break time=\'200ms\'/> close one',
   // From Repeat.js
@@ -109,9 +109,9 @@ const informal = {
 // Formal strings - calling out the dealer in third person
 const formal = {
   // From Bet.js
-  'GOOD_PLAYER_CARD': 'You got {0}|You got {0}|Ooh a {0}|{0} nice',
+  'GOOD_PLAYER_CARD': 'You got {0}|You got {0}|{0} <break time=\'200ms\'/> nice',
   'NORMAL_PLAYER_CARD': 'You got {0}|You got {0}|Here\'s a {0} for you',
-  'BAD_PLAYER_CARD': 'You got {0}|You got {0}|{0} sorry|sorry it\'s a {0}',
+  'BAD_PLAYER_CARD': 'You got {0}|You got {0}|{0} <break time=\'400ms\'/> sorry|sorry it\'s a {0}',
   'DEALER_CARD': 'The dealer got {0}|The dealer got {0}|{0} for the dealer',
   'DEALER_TOUGH_BEAT': 'The dealer got {0}|The dealer got {0}|Ouch a {0} for the dealer|{0} for the dealer <break time=\'200ms\'/> close one',
   // From Repeat.js

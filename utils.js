@@ -141,6 +141,7 @@ module.exports = {
   shuffleDeck: function(game, userId) {
     let i;
     let rank;
+    const start = Date.now();
 
     game.deck = [];
     const suits = ['C', 'D', 'H', 'S'];
@@ -171,6 +172,8 @@ module.exports = {
       game.deck[card1] = game.deck[card2];
       game.deck[card2] = tempCard;
     }
+
+    console.log('Shuffle took ' + (Date.now() - start) + ' ms');
   },
   sayCard: function(context, card) {
     const suits = JSON.parse(context.t('CARD_SUITS'));
@@ -210,17 +213,17 @@ module.exports = {
     let dealerText;
 
     if (playerCard.rank > 10) {
-      playerText = pickRandomOption(context, 'GOOD_PLAYER_CARD');
+      playerText = module.exports.pickRandomOption(context, 'GOOD_PLAYER_CARD');
     } else if (playerCard.rank < 5) {
-      playerText = pickRandomOption(context, 'BAD_PLAYER_CARD');
+      playerText = module.exports.pickRandomOption(context, 'BAD_PLAYER_CARD');
     } else {
-      playerText = pickRandomOption(context, 'NORMAL_PLAYER_CARD');
+      playerText = module.exports.pickRandomOption(context, 'NORMAL_PLAYER_CARD');
     }
 
     if ((dealerCard.rank > playerCard.rank) && (playerCard.rank > 10)) {
-      dealerText = pickRandomOption(context, 'DEALER_TOUGH_BEAT');
+      dealerText = module.exports.pickRandomOption(context, 'DEALER_TOUGH_BEAT');
     } else {
-      dealerText = pickRandomOption(context, 'DEALER_CARD');
+      dealerText = module.exports.pickRandomOption(context, 'DEALER_CARD');
     }
 
     return format
@@ -265,6 +268,22 @@ module.exports = {
     }
 
     callback(amount, speech, reprompt);
+  },
+  pickRandomOption: function(context, res) {
+    const game = context.attributes[context.attributes.currentGame];
+
+    if (res && context.t(res)) {
+      const options = context.t(res).split('|');
+      const randomValue = seedrandom(context.event.session.user.userId + (game.timestamp ? game.timestamp : ''))();
+      const choice = Math.floor(randomValue * options.length);
+      if (choice == options.length) {
+        choice--;
+      }
+
+      return options[choice];
+    } else {
+      return undefined;
+    }
   },
 };
 
@@ -330,22 +349,5 @@ function roundPlayers(context, playerCount) {
   } else {
     // "Over" to the nearest hundred
     return context.t('MORE_THAN_PLAYERS').replace('{0}', 100 * Math.floor(playerCount / 100));
-  }
-}
-
-function pickRandomOption(context, res) {
-  const game = context.attributes[context.attributes.currentGame];
-
-  if (res && context.t(res)) {
-    const options = context.t(res).split('|');
-    const randomValue = seedrandom(context.event.session.user.userId + (game.timestamp ? game.timestamp : ''))();
-    const choice = Math.floor(randomValue * options.length);
-    if (choice == options.length) {
-      choice--;
-    }
-
-    return options[choice];
-  } else {
-    return undefined;
   }
 }

@@ -49,11 +49,10 @@ module.exports = {
         this.handler.state = 'ATWAR';
 
         // If the side bet was placed, let them know it won
+        speech += utils.pickRandomOption(this, 'BET_SAME_CARD');
         if (sideBetPlaced) {
           game.bankroll += 10 * game.sideBet;
           speech += this.t('BET_SAME_CARD_SIDEBET').replace('{0}', 10 * game.sideBet);
-        } else {
-          speech += this.t('BET_SAME_CARD');
         }
         reprompt = this.t('BET_REPROMPT_WAR');
       } else {
