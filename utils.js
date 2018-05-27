@@ -153,24 +153,17 @@ module.exports = {
       }
     }
 
-    // OK, let's shuffle the deck - we'll do this by going thru
-    // 10 * number of cards times, and swap random pairs each iteration
-    // Yeah, there are probably more elegant solutions but this should do the job
-    for (i = 0; i < game.rules.numberOfDecks * 520; i++) {
-      const randomValue1 = seedrandom(i + userId + (game.timestamp ? game.timestamp : ''))();
-      const randomValue2 = seedrandom('A' + i + userId + (game.timestamp ? game.timestamp : ''))();
-      const card1 = Math.floor(randomValue1 * game.deck.length);
-      const card2 = Math.floor(randomValue2 * game.deck.length);
-      if (card1 == game.deck.length) {
-        card1--;
+    // Shuffle using the Fisher-Yates algorithm
+    for (i = 0; i < game.deck.length - 1; i++) {
+      const randomValue = seedrandom(i + userId + (game.timestamp ? game.timestamp : ''))();
+      let j = Math.floor(randomValue * (game.deck.length - i));
+      if (j == (game.deck.length - i)) {
+        j--;
       }
-      if (card2 == game.deck.length) {
-        card2--;
-      }
-      const tempCard = game.deck[card1];
-
-      game.deck[card1] = game.deck[card2];
-      game.deck[card2] = tempCard;
+      j += i;
+      const tempCard = game.deck[i];
+      game.deck[i] = game.deck[j];
+      game.deck[j] = tempCard;
     }
 
     console.log('Shuffle took ' + (Date.now() - start) + ' ms');
