@@ -45,10 +45,6 @@ module.exports = {
       });
     }
 
-    if (!process.env.NOLOG) {
-      console.log(JSON.stringify(context.event));
-    }
-
     if (error) {
       const res = require('./' + context.event.request.locale + '/resources');
       console.log('Speech error: ' + error);
