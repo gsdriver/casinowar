@@ -39,7 +39,8 @@ module.exports = {
     // OK, who won (player wins ties)
     if (game.player[1].rank >= game.dealer[1].rank) {
       // You won!
-      if (game.rules.tieBonus) {
+      if ((game.player[1].rank == game.dealer[1].rank) &&
+          game.rules.tieBonus) {
         speech += this.t('WAR_TIE_WINNER').replace('{0}', (1 + game.rules.tieBonus) * game.bet);
         game.bankroll += (3 + game.rules.tieBonus) * game.bet;
       } else {

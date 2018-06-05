@@ -35,7 +35,7 @@ const atWarHandlers = Alexa.CreateStateHandler('ATWAR', {
   'AMAZON.StopIntent': Exit.handleIntent,
   'AMAZON.CancelIntent': Exit.handleIntent,
   'Unhandled': function() {
-    utils.emitResponse(this, null, null, this.t('UNKNOWN_INTENT'), this.t('UNKNOWN)INTENT_REPROMPT'));
+    utils.emitResponse(this, null, null, this.t('UNKNOWN_INTENT'), this.t('UNKNOWN_INTENT_REPROMPT'));
   },
   'SessionEndedRequest': function() {
     saveState(this.event.session.user.userId, this.attributes);
@@ -60,7 +60,7 @@ const playingHandlers = Alexa.CreateStateHandler('PLAYING', {
   'AMAZON.StopIntent': Exit.handleIntent,
   'AMAZON.CancelIntent': Exit.handleIntent,
   'Unhandled': function() {
-    utils.emitResponse(this, null, null, this.t('UNKNOWN_INTENT'), this.t('UNKNOWN)INTENT_REPROMPT'));
+    utils.emitResponse(this, null, null, this.t('UNKNOWN_INTENT'), this.t('UNKNOWN_INTENT_REPROMPT'));
   },
   'SessionEndedRequest': function() {
     saveState(this.event.session.user.userId, this.attributes);
@@ -82,7 +82,7 @@ const handlers = {
   },
   'LaunchRequest': Launch.handleIntent,
   'Unhandled': function() {
-    utils.emitResponse(this, null, null, this.t('UNKNOWN_INTENT'), this.t('UNKNOWN)INTENT_REPROMPT'));
+    utils.emitResponse(this, null, null, this.t('UNKNOWN_INTENT'), this.t('UNKNOWN_INTENT_REPROMPT'));
   },
   'SessionEndedRequest': function() {
     saveState(this.event.session.user.userId, this.attributes);

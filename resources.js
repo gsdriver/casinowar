@@ -9,7 +9,7 @@ const common = {
   'BET_INVALID_AMOUNT': 'I\'m sorry, {0} is not a valid amount to bet.',
   'BET_INVALID_REPROMPT': 'What else can I help you with?',
   'BET_CARDS': '<audio src=\"https://s3-us-west-2.amazonaws.com/alexasoundclips/dealcard.mp3\"/> {0} <audio src=\"https://s3-us-west-2.amazonaws.com/alexasoundclips/dealcard.mp3\"/> and {1}. ',
-  'BET_SAME_CARD': 'It\'s a tie! |Looks like a war |It\'s a tie! |<audio src="https://s3-us-west-2.amazonaws.com/alexasoundclips/war/war1.mp3"/> |<audio src="https://s3-us-west-2.amazonaws.com/alexasoundclips/war/war2.mp3"/> |<audio src="https://s3-us-west-2.amazonaws.com/alexasoundclips/war/war3.mp3"/> |<audio src="https://s3-us-west-2.amazonaws.com/alexasoundclips/war/war4.mp3"/> ',
+  'BET_SAME_CARD': 'It\'s a tie! ',
   'BET_WINNER': 'You won! ',
   'BET_LOSER': 'You lose! ',
   'BET_REPROMPT_WAR': 'Say yes to go to war or no to surrender. ',

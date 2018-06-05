@@ -5,6 +5,7 @@
 'use strict';
 
 const utils = require('../utils');
+const seedrandom = require('seedrandom');
 
 module.exports = {
   handleIntent: function() {
@@ -50,7 +51,19 @@ module.exports = {
         this.handler.state = 'ATWAR';
 
         // If the side bet was placed, let them know it won
-        speech += utils.pickRandomOption(this, 'BET_SAME_CARD');
+        // We have 6 audio files to choose from
+        const warSounds = parseInt(process.env.WARCOUNT);
+        if (!isNaN(warSounds)) {
+          const randomValue = seedrandom(this.event.session.user.userId + (game.timestamp ? game.timestamp : ''))();
+          const choice = 1 + Math.floor(randomValue * warSounds);
+          if (choice > warSounds) {
+            choice--;
+          }
+          speech += `<audio src="https://s3-us-west-2.amazonaws.com/alexasoundclips/war/war${choice}.mp3"/> `;
+        } else {
+          speech += this.t('BET_SAME_CARD');
+        }
+
         if (sideBetPlaced) {
           game.bankroll += 10 * game.sideBet;
           speech += this.t('BET_SAME_CARD_SIDEBET').replace('{0}', 10 * game.sideBet);
