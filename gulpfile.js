@@ -19,7 +19,7 @@ gulp.task('build:prepare', ['clean'], () =>
 
 // task to run es lint.
 gulp.task('lint', () =>
-  gulp.src(['*.js', '*/**/*.js', '!test/**', '!build/**', '!node_modules/**', '!ext/**'])
+  gulp.src(['*.js', '*/**/*.js', '!test/**', '!lex/test/**', '!build/**', '!node_modules/**', '!ext/**'])
     .pipe(eslint())
     .pipe(eslint.format())
     .pipe(eslint.format(reporter, (results) => {
