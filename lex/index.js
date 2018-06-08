@@ -57,7 +57,7 @@ function passToAlexa(intentRequest, intentName, callback) {
   };
 
   // Do we have Alexa attributes
-  if (!intentRequest.sessionAttributes.alexa) {
+  if (!intentRequest.sessionAttributes || !intentRequest.sessionAttributes.alexa) {
     lambda.session.new = true;
     lambda.request.type = 'LaunchRequest';
     lambda.request.locale = 'en-US';
