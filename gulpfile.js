@@ -12,7 +12,7 @@ const del = require('del');
 gulp.task('build:prepare', ['clean'], () =>
   // copy only what we need for deployment
   gulp.src(['**/*', '!build/**', '!.git', '!.git/**', '!package.json', '!README.md',
-      '!speechAssets', '!speechAssets/**', '!.gitignore',
+      '!speechAssets', '!speechAssets/**', '!.gitignore', '!lex', '!lex/**',
       '!.idea', '!.idea/**', '!*.zip'], {dot: true})
     .pipe(gulp.dest('build/'))
 );

@@ -13,15 +13,27 @@ function ssmlToText(ssml) {
   return text;
 }
 
-function close(sessionAttributes, fulfillmentState, message) {
-  return {
-    sessionAttributes,
-    dialogAction: {
-      type: 'Close',
-      fulfillmentState,
-      message,
-    },
-  };
+function mapDeck(deck) {
+  // To keep size of attributes down, this function maps the deck to a string
+  let text = '';
+
+  deck.forEach((card) => {
+    text += ('.' + card.rank + '-' + card.suit);
+  });
+
+  return text.substr(1);
+}
+
+function parseDeck(text) {
+  const cards = text.split('.');
+  const deck = [];
+
+  cards.forEach((card) => {
+    const thisCard = card.split('-');
+    deck.push({rank: thisCard[0], suit: thisCard[1]});
+  });
+
+  return deck;
 }
 
 function passToAlexa(intentRequest, intentName, callback) {
@@ -32,8 +44,9 @@ function passToAlexa(intentRequest, intentName, callback) {
       'application': {
         'applicationId': 'amzn1.ask.skill.af231135-5719-460a-85cc-af8b684c6069',
       },
+      'attributes': {'bot': true},
       'user': {
-        'userId': 'lex-' + intentRequest.userId,
+        'userId': 'LEX-' + intentRequest.userId,
       },
     },
     'request': {
@@ -45,13 +58,16 @@ function passToAlexa(intentRequest, intentName, callback) {
 
   // Do we have Alexa attributes
   if (!intentRequest.sessionAttributes.alexa) {
-    lambda.session.attributes = {};
     lambda.session.new = true;
     lambda.request.type = 'LaunchRequest';
     lambda.request.locale = 'en-US';
     lambda.request.intent = {};
   } else {
-    lambda.session.attributes = JSON.parse(intentRequest.sessionAttributes.alexa);
+    const attributes = JSON.parse(intentRequest.sessionAttributes.alexa);
+    if (attributes.basic && attributes.basic.deck) {
+      attributes.basic.deck = parseDeck(attributes.basic.deck);
+    }
+    lambda.session.attributes = Object.assign(lambda.session.attributes, attributes);
     lambda.session.new = false;
     lambda.request.type = 'IntentRequest';
     lambda.request.locale = lambda.session.attributes.playerLocale;
@@ -74,60 +90,55 @@ function passToAlexa(intentRequest, intentName, callback) {
   Lambda.invoke({FunctionName: 'CasinoWar', Payload: JSON.stringify(lambda)}, (err, data) => {
     if (err) {
       console.log(err);
-      callback(close(intentRequest.sessionAttributes, 'Fulfilled',
-        {
-          contentType: 'PlainText',
-          content: 'Sorry, I encountered a problem. Please try again later.',
-        }));
+      callback({
+        dialogAction: {
+          type: 'Close',
+          fulfillmentState: 'Fulfilled',
+          message: {
+            contentType: 'PlainText',
+            content: 'Sorry, I encountered a problem. Please try again later.',
+          },
+        },
+      });
     } else {
-      const response = JSON.parse(data.Payload);
-      callback(close({'alexa': JSON.stringify(response.sessionAttributes)}, 'Fulfilled',
-        {
-          contentType: 'PlainText',
-          content: ssmlToText(response.response.outputSpeech.ssml),
-        }));
+      // Is the session open or closed?
+      const alexaResponse = JSON.parse(data.Payload);
+      if (alexaResponse.sessionAttributes.basic && alexaResponse.sessionAttributes.basic.deck) {
+        alexaResponse.sessionAttributes.basic.deck =
+            mapDeck(alexaResponse.sessionAttributes.basic.deck);
+      }
+      const response = {
+        sessionAttributes: {'alexa': JSON.stringify(alexaResponse.sessionAttributes)},
+        dialogAction: {
+          message: {
+            contentType: 'PlainText',
+            content: ssmlToText(alexaResponse.response.outputSpeech.ssml),
+          },
+        },
+      };
+
+      if (alexaResponse.response.shouldEndSession) {
+        response.dialogAction.type = 'Close';
+        response.dialogAction.fulfillmentState = 'Fulfilled';
+      } else {
+        response.dialogAction.type = 'ElicitIntent';
+      }
+
+      callback(response);
     }
   });
 }
 
 function dispatch(intentRequest, callback) {
+  const intentName = intentRequest.currentIntent.name;
+  const mapping = {'Bet': 'BetIntent', 'Cancel': 'AMAZON.CancelIntent', 'Help': 'AMAZON.HelpIntent',
+    'HighScore': 'HighScoreIntent', 'No': 'AMAZON.NoIntent', 'PlaceSideBet': 'PlaceSideBetIntent',
+    'RemoveSideBet': 'RemoveSideBetIntent', 'Repeat': 'AMAZON.RepeatIntent', 'Yes': 'AMAZON.YesIntent',
+  };
+  const alexaIntent = mapping[intentName];
+
   if (!process.env.NOLOG) {
     console.log(`dispatch userId=${intentRequest.userId}, intentName=${intentRequest.currentIntent.name}`);
-  }
-
-  const intentName = intentRequest.currentIntent.name;
-  let alexaIntent;
-
-  switch (intentName) {
-    case 'Bet':
-      alexaIntent = 'BetIntent';
-      break;
-    case 'Cancel':
-      alexaIntent = 'AMAZON.CancelIntent';
-      break;
-    case 'Help':
-      alexaIntent = 'AMAZON.HelpIntent';
-      break;
-    case 'HighScore':
-      alexaIntent = 'HighScoreIntent';
-      break;
-    case 'No':
-      alexaIntent = 'AMAZON.NoIntent';
-      break;
-    case 'PlaceSideBet':
-      alexaIntent = 'PlaceSideBetIntent';
-      break;
-    case 'RemoveSideBet':
-      alexaIntent = 'RemoveSideBetIntent';
-      break;
-    case 'Repeat':
-      alexaIntent = 'AMAZON.RepeatIntent';
-      break;
-    case 'Yes':
-      alexaIntent = 'AMAZON.YesIntent';
-      break;
-    default:
-      break;
   }
 
   if (alexaIntent) {
