@@ -30,7 +30,7 @@ function parseDeck(text) {
 
   cards.forEach((card) => {
     const thisCard = card.split('-');
-    deck.push({rank: thisCard[0], suit: thisCard[1]});
+    deck.push({rank: parseInt(thisCard[0]), suit: thisCard[1]});
   });
 
   return deck;
