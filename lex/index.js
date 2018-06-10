@@ -8,7 +8,8 @@ function ssmlToText(ssml) {
   let text = ssml;
 
   // Remove all angle brackets
-  text = ssml.replace(/<\/?[^>]+(>|$)/g, '');
+  text = ssml.replace(/<break[^>]+>/g, ' ... ');
+  text = text.replace(/<\/?[^>]+(>|$)/g, '');
   text = text.replace(/\s+/g, ' ').trim();
   return text;
 }
@@ -30,7 +31,7 @@ function parseDeck(text) {
 
   cards.forEach((card) => {
     const thisCard = card.split('-');
-    deck.push({rank: parseInt(thisCard[0]), suit: thisCard[1]});
+    deck.push({rank: parseInt(thisCard[0], 10), suit: thisCard[1]});
   });
 
   return deck;
@@ -56,21 +57,11 @@ function passToAlexa(intentRequest, intentName, callback) {
     'version': '1.0',
   };
 
-  // Do we have Alexa attributes
-  if (!intentRequest.sessionAttributes || !intentRequest.sessionAttributes.alexa) {
-    lambda.session.new = true;
+  // Is this a LaunchRequest or intent?
+  if (intentName == 'LaunchRequest') {
     lambda.request.type = 'LaunchRequest';
-    lambda.request.locale = 'en-US';
-    lambda.request.intent = {};
   } else {
-    const attributes = JSON.parse(intentRequest.sessionAttributes.alexa);
-    if (attributes.basic && attributes.basic.deck) {
-      attributes.basic.deck = parseDeck(attributes.basic.deck);
-    }
-    lambda.session.attributes = Object.assign(lambda.session.attributes, attributes);
-    lambda.session.new = false;
     lambda.request.type = 'IntentRequest';
-    lambda.request.locale = lambda.session.attributes.playerLocale;
     lambda.request.intent = {
       'name': intentName,
       'slots': {},
@@ -85,6 +76,20 @@ function passToAlexa(intentRequest, intentName, callback) {
         };
       }
     }
+  }
+
+  // Do we have Alexa attributes
+  if (!intentRequest.sessionAttributes || !intentRequest.sessionAttributes.alexa) {
+    lambda.session.new = true;
+    lambda.request.locale = 'en-US';
+  } else {
+    const attributes = JSON.parse(intentRequest.sessionAttributes.alexa);
+    if (attributes.basic && attributes.basic.deck) {
+      attributes.basic.deck = parseDeck(attributes.basic.deck);
+    }
+    lambda.session.attributes = Object.assign(lambda.session.attributes, attributes);
+    lambda.session.new = false;
+    lambda.request.locale = lambda.session.attributes.playerLocale;
   }
 
   Lambda.invoke({FunctionName: 'CasinoWar', Payload: JSON.stringify(lambda)}, (err, data) => {
@@ -133,7 +138,8 @@ function dispatch(intentRequest, callback) {
   const intentName = intentRequest.currentIntent.name;
   const mapping = {'Bet': 'BetIntent', 'Cancel': 'AMAZON.CancelIntent', 'Help': 'AMAZON.HelpIntent',
     'HighScore': 'HighScoreIntent', 'No': 'AMAZON.NoIntent', 'PlaceSideBet': 'PlaceSideBetIntent',
-    'RemoveSideBet': 'RemoveSideBetIntent', 'Repeat': 'AMAZON.RepeatIntent', 'Yes': 'AMAZON.YesIntent',
+    'RemoveSideBet': 'RemoveSideBetIntent', 'Launch': 'LaunchRequest',
+    'Repeat': 'AMAZON.RepeatIntent', 'Yes': 'AMAZON.YesIntent',
   };
   const alexaIntent = mapping[intentName];
 

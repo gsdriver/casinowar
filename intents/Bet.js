@@ -53,7 +53,7 @@ module.exports = {
         // If the side bet was placed, let them know it won
         // We have 6 audio files to choose from
         const warSounds = parseInt(process.env.WARCOUNT);
-        if (!isNaN(warSounds)) {
+        if (!isNaN(warSounds) && !this.attributes.bot) {
           const randomValue = seedrandom(this.event.session.user.userId + (game.timestamp ? game.timestamp : ''))();
           const choice = 1 + Math.floor(randomValue * warSounds);
           if (choice > warSounds) {
