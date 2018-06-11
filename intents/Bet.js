@@ -43,6 +43,9 @@ module.exports = {
       }
       game.player = [game.deck.shift()];
       game.dealer = [game.deck.shift()];
+      if (process.env.FORCETIE) {
+        game.dealer[0].rank = game.player[0].rank;
+      }
       speech = utils.sayDealtCards(this, game.player[0], game.dealer[0],
           (sayBet) ? game.bet : undefined);
 
