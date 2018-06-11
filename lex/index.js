@@ -7,8 +7,13 @@ const Lambda = new AWS.Lambda();
 function ssmlToText(ssml) {
   let text = ssml;
 
-  // Remove all angle brackets
-  text = ssml.replace(/<break[^>]+>/g, ' ... ');
+  // Replace war audio file with tie speech
+  text = text.replace(/<audio.*war\/war[^>]+>/g, ' It\'s a tie! ');
+
+  // Replace break with ...
+  text = text.replace(/<break[^>]+>/g, ' ... ');
+
+  // Remove all other angle brackets
   text = text.replace(/<\/?[^>]+(>|$)/g, '');
   text = text.replace(/\s+/g, ' ').trim();
   return text;
