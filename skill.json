@@ -1,0 +1,112 @@
+{
+  "manifest": {
+    "publishingInformation": {
+      "locales": {
+        "en-US": {
+          "summary": "Play war head to head against the dealer",
+          "examplePhrases": [
+            "Alexa, open casino war",
+            "bet fifty dollars",
+            "read high scores"
+          ],
+          "keywords": [
+            "casino",
+            "war"
+          ],
+          "name": "Casino War",
+          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/aa40/aa9e88d8745d4d5d8e3346ca2f759b38/APP_ICON?versionId=qR2hkW7neWbW1UQYRY8V9duCiNgm3AD2&AWSAccessKeyId=AKIAI3X6PUXD7CU5F5BQ&Expires=1529327842&Signature=SYOkC3nMPbkJOFEMIGe0hWyNtZQ%3D",
+          "description": "Play rounds of Casino War, tracking your bankroll as you play. You start with 5,000 dollars in credit and can vary your bet from 5 to 1,000 dollars. Play head to head against the dealer - high card wins unless there's a tie and you go to war!  Compare your bankroll with other players by saying \"read high scores\" to hear the leader board. Keep playing and you can move to the top!\n\nHave feedback or features you'd like to see? Connect with us on Facebook at https://www.facebook.com/alexacasinogames!",
+          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/c6ae/2d554f6a9658420d88bf69b1e2b8d212/APP_ICON_LARGE?versionId=PQ6d0dT93860FuqSEFvPu9Bk1GgmAnJ0&AWSAccessKeyId=AKIAI3X6PUXD7CU5F5BQ&Expires=1529327842&Signature=HE%2BvvSTSGLFa4i2%2FxTHvHlMNn9s%3D"
+        },
+        "en-CA": {
+          "summary": "Play war head to head against the dealer",
+          "examplePhrases": [
+            "Alexa, open casino war",
+            "bet fifty dollars",
+            "read high scores"
+          ],
+          "keywords": [
+            "casino",
+            "war"
+          ],
+          "name": "Casino War",
+          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/dce7/f638b79b5e85494b8ac699b8db56eed8/APP_ICON?versionId=TVE3NPnACQF4jXqWEw9IsY_wM.HTZmtR&AWSAccessKeyId=AKIAI3X6PUXD7CU5F5BQ&Expires=1529327842&Signature=eUArnz00Sv9kj8t5nIx%2F1SaQhlc%3D",
+          "description": "Play rounds of Casino War, tracking your bankroll as you play. You start with 5,000 dollars in credit and can vary your bet from 5 to 1,000 dollars. Play head to head against the dealer - high card wins unless there's a tie and you go to war!  Compare your bankroll with other players by saying \"read high scores\" to hear the leader board. Keep playing and you can move to the top!\n\nHave feedback or features you'd like to see? Connect with us on Facebook at https://www.facebook.com/alexacasinogames!",
+          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/5f11/9905bff5d216419e9f957027335e9832/APP_ICON_LARGE?versionId=lfhNFWAovHbLhFOxiHqEbiY8Dpv9tSIL&AWSAccessKeyId=AKIAI3X6PUXD7CU5F5BQ&Expires=1529327842&Signature=tjKrgDZV7bqSdWTWw58imQdvg7g%3D"
+        },
+        "en-IN": {
+          "summary": "Play war head to head against the dealer",
+          "examplePhrases": [
+            "Alexa, open casino war",
+            "bet fifty dollars",
+            "read high scores"
+          ],
+          "keywords": [
+            "casino",
+            "war"
+          ],
+          "name": "Casino War",
+          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/cf48/62cc2b2710dd45c5bf20f85e0db13092/APP_ICON?versionId=IvscFhQV5nmWqsRsXozGeUAoFuKXr75N&AWSAccessKeyId=AKIAI3X6PUXD7CU5F5BQ&Expires=1529327842&Signature=8%2BRVI1fyHI0PV%2FgkRpvz5nFYQCE%3D",
+          "description": "Play rounds of Casino War, tracking your bankroll as you play. You start with 5,000 dollars in credit and can vary your bet from 5 to 1,000 dollars. Play head to head against the dealer - high card wins unless there's a tie and you go to war!  Compare your bankroll with other players by saying \"read high scores\" to hear the leader board. Keep playing and you can move to the top!\n\nHave feedback or features you'd like to see? Connect with us on Facebook at https://www.facebook.com/alexacasinogames!",
+          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/62e5/1467756f9c894492b00faf769d076200/APP_ICON_LARGE?versionId=XOmHfWaaAaGSpqkGXxz4DaoQjHF3lq1r&AWSAccessKeyId=AKIAI3X6PUXD7CU5F5BQ&Expires=1529327842&Signature=KBH4221Y9TbipNDaOeVr7oz0bzQ%3D"
+        },
+        "en-AU": {
+          "summary": "Play war head to head against the dealer",
+          "examplePhrases": [
+            "Alexa, open casino war",
+            "bet fifty dollars",
+            "read high scores"
+          ],
+          "keywords": [
+            "casino",
+            "war"
+          ],
+          "name": "Casino War",
+          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/dec2/2793df122c9d4b40ab61ddb3b5b2e4b7/APP_ICON?versionId=0s1Cs8x6HoYYVi8N2E7zq9arKzEOU_D4&AWSAccessKeyId=AKIAI3X6PUXD7CU5F5BQ&Expires=1529327842&Signature=sEREjroMpROJDK9lQmFjYomzcgY%3D",
+          "description": "Play rounds of Casino War, tracking your bankroll as you play. You start with 5,000 dollars in credit and can vary your bet from 5 to 1,000 dollars. Play head to head against the dealer - high card wins unless there's a tie and you go to war!  Compare your bankroll with other players by saying \"read high scores\" to hear the leader board. Keep playing and you can move to the top!\n\nHave feedback or features you'd like to see? Connect with us on Facebook at https://www.facebook.com/alexacasinogames!",
+          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/70d5/ffa48f884017433fa23cce7e3061985b/APP_ICON_LARGE?versionId=w6uWDQ7LvC7T8ZpW423Y_XCpbkEra2_f&AWSAccessKeyId=AKIAI3X6PUXD7CU5F5BQ&Expires=1529327842&Signature=E4e%2BD4BnBtb2sJuJ64Q4m47aOMw%3D"
+        },
+        "en-GB": {
+          "summary": "Play war head to head against the dealer",
+          "examplePhrases": [
+            "Alexa, open casino war",
+            "bet fifty pounds",
+            "read high scores"
+          ],
+          "keywords": [
+            "casino",
+            "war"
+          ],
+          "name": "Casino War",
+          "smallIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/d654/815a4d6cceb34a9587d3ce868b8b2387/APP_ICON?versionId=EwAd1j_soV5_htfwvFL3cSLnIkX6MKV4&AWSAccessKeyId=AKIAI3X6PUXD7CU5F5BQ&Expires=1529327842&Signature=dTOz06Z%2FzkRunMqEAHUQ1k2I9Wo%3D",
+          "description": "Play rounds of Casino War, tracking your bankroll as you play. You start with 5,000 pounds in credit and can vary your bet from 5 to 1,000 pounds. Play head to head against the dealer - high card wins unless there's a tie and you go to war!  Compare your bankroll with other players by saying \"read high scores\" to hear the leader board. Keep playing and you can move to the top!\n\nHave feedback or features you'd like to see? Connect with us on Facebook at https://www.facebook.com/alexacasinogames!",
+          "largeIconUri": "https://s3.amazonaws.com/CAPS-SSE/echo_developer/103f/1ca0f099d65643b2942a7bf0a10cc911/APP_ICON_LARGE?versionId=jBoNKwRyRN9pzwQkJdjPdBScuEMOkWRr&AWSAccessKeyId=AKIAI3X6PUXD7CU5F5BQ&Expires=1529327842&Signature=1V4AzHuv5oirw8g2QHaeYmZ3uNs%3D"
+        }
+      },
+      "isAvailableWorldwide": true,
+      "testingInstructions": "Bet between five and one thousand each round.  You can also say place side bet to place a bet that the first two cards will match.  The game is pretty simple - high card wins, and in case of a tie you can either surrender or get another card (high card wins).",
+      "category": "GAMES",
+      "distributionCountries": []
+    },
+    "apis": {
+      "custom": {
+        "endpoint": {
+          "sourceDir": "lambda\\custom"
+        },
+        "interfaces": [
+          {
+            "type": "RENDER_TEMPLATE"
+          }
+        ]
+      }
+    },
+    "manifestVersion": "1.0",
+    "privacyAndCompliance": {
+      "allowsPurchases": false,
+      "isExportCompliant": true,
+      "containsAds": false,
+      "isChildDirected": false,
+      "usesPersonalInfo": false
+    }
+  }
+}
