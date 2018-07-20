@@ -97,7 +97,7 @@ function passToAlexa(intentRequest, intentName, callback) {
     lambda.request.locale = lambda.session.attributes.playerLocale;
   }
 
-  Lambda.invoke({FunctionName: 'CasinoWar', Payload: JSON.stringify(lambda)}, (err, data) => {
+  Lambda.invoke({FunctionName: 'CasinoWar2', Payload: JSON.stringify(lambda)}, (err, data) => {
     if (err) {
       console.log(err);
       callback({

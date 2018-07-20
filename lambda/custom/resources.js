@@ -19,6 +19,7 @@ const common = {
   // From Help.js
   'HELP_TEXT': 'Refer to the Alexa app for the full rules of the game. ',
   'HELP_CARD_TITLE': 'Casino War',
+  'HELP_BOT_COMMANDS': 'Try sending me these messages:\n\n - "deal" to deal the cards\n - "place a tie bet" to bet that the next round will be a tie (pays 10:1)\n - "read high scores" to read the leader board',
   // From HighScore.js
   'HIGHSCORE_REPROMPT': 'What else can I help you with?',
   // From Launch.js
