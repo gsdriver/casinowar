@@ -8,13 +8,42 @@ const utils = require('../utils');
 const ads = require('../ads');
 
 module.exports = {
-  handleIntent: function() {
-    if (this.attributes.bot) {
-      // No ads for bots
-      utils.emitResponse(this, null, this.t('EXIT_GAME').replace('{0}', ''), null, null);
+  canHandle(handlerInput) {
+    const request = handlerInput.requestEnvelope.request;
+
+    // Can always handle with Stop and Cancel
+    if (request.type === 'IntentRequest') {
+      if ((request.intent.name === 'AMAZON.CancelIntent')
+        || (request.intent.name === 'AMAZON.StopIntent')) {
+        return true;
+      }
+
+      // Can also handle No if said while not at war
+      if (request.intent.name === 'AMAZON.NoIntent') {
+        const attributes = handlerInput.attributesManager.getSessionAttributes();
+        if (!utils.atWar(attributes)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  },
+  handle: function(handlerInput) {
+    const event = handlerInput.requestEnvelope;
+    const attributes = handlerInput.attributesManager.getSessionAttributes();
+    const res = require('../resources')(event.request.locale);
+
+    if (attributes.bot) {
+      handlerInput.responseBuilder.speak(res.strings.EXIT_GAME.replace('{0}', ''));
     } else {
-      ads.getAd(this.attributes, 'war', this.event.request.locale, (adText) => {
-        utils.emitResponse(this, null, this.t('EXIT_GAME').replace('{0}', adText), null, null);
+      return new Promise((resolve, reject) => {
+        ads.getAd(attributes, 'war', event.request.locale, (adText) => {
+          handlerInput.responseBuilder
+            .speak(res.strings.EXIT_GAME.replace('{0}', adText))
+            .withShouldEndSession(true);
+          resolve();
+        });
       });
     }
   },

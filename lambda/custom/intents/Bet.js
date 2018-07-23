@@ -8,19 +8,33 @@ const utils = require('../utils');
 const seedrandom = require('seedrandom');
 
 module.exports = {
-  handleIntent: function() {
+  canHandle(handlerInput) {
+    const request = handlerInput.requestEnvelope.request;
+    const attributes = handlerInput.attributesManager.getSessionAttributes();
+
+    return (!utils.atWar(attributes) && (request.type === 'IntentRequest')
+      && ((request.intent.name === 'BetIntent')
+        || (request.intent.name === 'AMAZON.YesIntent')));
+  },
+  handle: function(handlerInput) {
+    const event = handlerInput.requestEnvelope;
+    const attributes = handlerInput.attributesManager.getSessionAttributes();
+    const res = require('../resources')(event.request.locale);
+
     // The bet amount is optional - if not present we will use a default value
     // of either the last bet amount or the minimum bet
-    utils.getBetAmount(this, (amount, speechError, repromptError) => {
+    utils.getBetAmount(event, attributes, (amount, speechError, repromptError) => {
       if (speechError) {
-        utils.emitResponse(this, null, null, speechError, repromptError);
+        handlerInput.responseBuilder
+          .speak(speechError)
+          .reprompt(repromptError);
         return;
       }
 
       let reprompt;
       let speech;
       let sideBetPlaced;
-      const game = this.attributes[this.attributes.currentGame];
+      const game = attributes[attributes.currentGame];
 
       // Place the bet and deal the cards
       const sayBet = (game.bet !== amount);
@@ -39,60 +53,60 @@ module.exports = {
 
       // If fewer than 20 cards, shuffle
       if (game.deck.length < 20) {
-        utils.shuffleDeck(game, this.event.session.user.userId);
+        utils.shuffleDeck(game, event.session.user.userId);
       }
       game.player = [game.deck.shift()];
       game.dealer = [game.deck.shift()];
       if (process.env.FORCETIE) {
         game.dealer[0].rank = game.player[0].rank;
       }
-      speech = utils.sayDealtCards(this, game.player[0], game.dealer[0],
+      speech = utils.sayDealtCards(event, attributes, game.player[0], game.dealer[0],
           (sayBet) ? game.bet : undefined);
 
       // If these are the same rank - you have a war!
       if (game.player[0].rank == game.dealer[0].rank) {
-        this.handler.state = 'ATWAR';
-
         // If the side bet was placed, let them know it won
         // We have 6 audio files to choose from
         const warSounds = parseInt(process.env.WARCOUNT);
-        if (!isNaN(warSounds) && !this.attributes.bot) {
-          const randomValue = seedrandom(this.event.session.user.userId + (game.timestamp ? game.timestamp : ''))();
+        if (!isNaN(warSounds) && !attributes.bot) {
+          const randomValue = seedrandom(event.session.user.userId + (game.timestamp ? game.timestamp : ''))();
           const choice = 1 + Math.floor(randomValue * warSounds);
           if (choice > warSounds) {
             choice--;
           }
           speech += `<audio src="https://s3-us-west-2.amazonaws.com/alexasoundclips/war/war${choice}.mp3"/> `;
         } else {
-          speech += this.t('BET_SAME_CARD');
+          speech += res.strings.BET_SAME_CARD;
         }
 
         if (sideBetPlaced) {
           game.bankroll += 10 * game.sideBet;
-          speech += this.t('BET_SAME_CARD_SIDEBET').replace('{0}', 10 * game.sideBet);
+          speech += res.strings.BET_SAME_CARD_SIDEBET.replace('{0}', 10 * game.sideBet);
         }
-        reprompt = this.t('BET_REPROMPT_WAR');
+        reprompt = res.strings.BET_REPROMPT_WAR;
       } else {
         // OK, who won?
         if (game.player[0].rank > game.dealer[0].rank) {
           // You won!
-          speech += this.t('BET_WINNER');
+          speech += res.strings.BET_WINNER;
           game.bankroll += 2 * game.bet;
         } else {
-          speech += this.t('BET_LOSER');
+          speech += res.strings.BET_LOSE;
         }
 
         // Reset bankroll if necessary
         if ((game.bankroll < game.rules.minBet) && game.rules.canReset) {
           game.bankroll = game.startingBankroll;
-          speech += this.t('RESET_BANKROLL').replace('{0}', game.bankroll);
+          speech += res.strings.RESET_BANKROLL.replace('{0}', game.bankroll);
         }
 
-        reprompt = this.t('BET_PLAY_AGAIN');
+        reprompt = res.strings.BET_PLAY_AGAIN;
       }
       speech += reprompt;
 
-      utils.emitResponse(this, null, null, speech, reprompt);
+      handlerInput.responseBuilder
+        .speak(speech)
+        .reprompt(reprompt);
     });
   },
 };

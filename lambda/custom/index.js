@@ -4,8 +4,7 @@
 
 'use strict';
 
-const AWS = require('aws-sdk');
-const Alexa = require('alexa-sdk');
+const Alexa = require('ask-sdk');
 const CanFulfill = require('./intents/CanFulfill');
 const Launch = require('./intents/Launch');
 const Bet = require('./intents/Bet');
@@ -14,79 +13,86 @@ const Exit = require('./intents/Exit');
 const Repeat = require('./intents/Repeat');
 const HighScore = require('./intents/HighScore');
 const War = require('./intents/War');
-const SideBet = require('./intents/SideBet');
-const resources = require('./resources');
+const NoWar = require('./intents/NoWar');
+const PlaceSideBet = require('./intents/PlaceSideBet');
+const RemoveSideBet = require('./intents/RemoveSideBet');
+const SessionEnd = require('./intents/SessionEnd');
+const Unhandled = require('./intents/Unhandled');
 const utils = require('./utils');
 const request = require('request');
 
-const APP_ID = 'amzn1.ask.skill.af231135-5719-460a-85cc-af8b684c6069';
+let responseBuilder;
 
-const atWarHandlers = Alexa.CreateStateHandler('ATWAR', {
-  'NewSession': function() {
-    this.handler.state = '';
-    this.emitWithState('NewSession');
-  },
-  'LaunchRequest': Launch.handleIntent,
-  'HighScoreIntent': HighScore.handleIntent,
-  'AMAZON.RepeatIntent': Repeat.handleIntent,
-  'AMAZON.FallbackIntent': Repeat.handleIntent,
-  'AMAZON.HelpIntent': Help.handleIntent,
-  'AMAZON.YesIntent': War.handleYesIntent,
-  'AMAZON.NoIntent': War.handleNoIntent,
-  'AMAZON.StopIntent': Exit.handleIntent,
-  'AMAZON.CancelIntent': Exit.handleIntent,
-  'Unhandled': function() {
-    utils.emitResponse(this, null, null, this.t('UNKNOWN_INTENT'), this.t('UNKNOWN_INTENT_REPROMPT'));
-  },
-  'SessionEndedRequest': function() {
-    saveState(this.event.session.user.userId, this.attributes);
-  },
-});
+const requestInterceptor = {
+  process(handlerInput) {
+    return new Promise((resolve, reject) => {
+      const attributesManager = handlerInput.attributesManager;
+      const sessionAttributes = attributesManager.getSessionAttributes();
+      const event = handlerInput.requestEnvelope;
 
-const playingHandlers = Alexa.CreateStateHandler('PLAYING', {
-  'NewSession': function() {
-    this.handler.state = '';
-    this.emitWithState('NewSession');
-  },
-  'LaunchRequest': Launch.handleIntent,
-  'BetIntent': Bet.handleIntent,
-  'PlaceSideBetIntent': SideBet.handlePlaceIntent,
-  'RemoveSideBetIntent': SideBet.handleRemoveIntent,
-  'HighScoreIntent': HighScore.handleIntent,
-  'AMAZON.RepeatIntent': Repeat.handleIntent,
-  'AMAZON.FallbackIntent': Repeat.handleIntent,
-  'AMAZON.HelpIntent': Help.handleIntent,
-  'AMAZON.YesIntent': Bet.handleIntent,
-  'AMAZON.NoIntent': Exit.handleIntent,
-  'AMAZON.StopIntent': Exit.handleIntent,
-  'AMAZON.CancelIntent': Exit.handleIntent,
-  'Unhandled': function() {
-    utils.emitResponse(this, null, null, this.t('UNKNOWN_INTENT'), this.t('UNKNOWN_INTENT_REPROMPT'));
-  },
-  'SessionEndedRequest': function() {
-    saveState(this.event.session.user.userId, this.attributes);
-  },
-});
+      if ((Object.keys(sessionAttributes).length === 0) ||
+        ((Object.keys(sessionAttributes).length === 1)
+          && sessionAttributes.bot)) {
+        // No session attributes - so get the persistent ones
+        attributesManager.getPersistentAttributes()
+          .then((attributes) => {
+            // If no persistent attributes, it's a new player
+            if (!attributes.currentGame) {
+              utils.initializeGame(event, attributes, 'basic');
+              attributes.playerLocale = event.request.locale;
+              request.post({url: process.env.SERVICEURL + 'war/newUser'}, (err, res, body) => {
+              });
+            }
 
-const handlers = {
-  'NewSession': function() {
-    // Initialize attributes and route the request
-    this.attributes.playerLocale = this.event.request.locale;
-    if (!this.attributes.currentGame) {
-      utils.initializeGame(this, 'basic');
-    }
-    if (!this.attributes.temp) {
-      this.attributes.temp = {};
-    }
+            // Since there were no session attributes, this is the first
+            // round of the session - set the temp attributes
+            attributes.temp = {};
+            attributes.sessions = (attributes.sessions + 1) || 1;
+            attributes.bot = sessionAttributes.bot;
+            attributesManager.setSessionAttributes(attributes);
+            responseBuilder = handlerInput.responseBuilder;
+            resolve();
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      } else {
+        responseBuilder = handlerInput.responseBuilder;
+        resolve();
+      }
+    });
+  },
+};
 
-    this.emit('LaunchRequest');
+const saveResponseInterceptor = {
+  process(handlerInput) {
+    return new Promise((resolve, reject) => {
+      const response = handlerInput.responseBuilder.getResponse();
+
+      if (response) {
+        utils.drawTable(handlerInput, () => {
+          if (response.shouldEndSession) {
+            // We are meant to end the session
+            SessionEnd.handle(handlerInput);
+          }
+          resolve();
+        });
+      } else {
+        resolve();
+      }
+    });
   },
-  'LaunchRequest': Launch.handleIntent,
-  'Unhandled': function() {
-    utils.emitResponse(this, null, null, this.t('UNKNOWN_INTENT'), this.t('UNKNOWN_INTENT_REPROMPT'));
+};
+
+const ErrorHandler = {
+  canHandle(handlerInput, error) {
+    console.log(error);
+    return error.name.startsWith('AskSdk');
   },
-  'SessionEndedRequest': function() {
-    saveState(this.event.session.user.userId, this.attributes);
+  handle(handlerInput, error) {
+    return handlerInput.responseBuilder
+      .speak('An error was encountered while handling your request. Try again later')
+      .getResponse();
   },
 };
 
@@ -98,7 +104,7 @@ if (process.env.DASHBOTKEY) {
 }
 
 function runGame(event, context, callback) {
-  AWS.config.update({region: 'us-east-1'});
+  const skillBuilder = Alexa.SkillBuilders.standard();
 
   if (!process.env.NOLOG) {
     console.log(JSON.stringify(event));
@@ -106,60 +112,36 @@ function runGame(event, context, callback) {
 
   // If this is a CanFulfill, handle this separately
   if (event.request && (event.request.type == 'CanFulfillIntentRequest')) {
-    CanFulfill.check(event, (response) => {
-      context.succeed(response);
-    });
+    callback(null, CanFulfill.check(event));
     return;
   }
 
-  const alexa = Alexa.handler(event, context);
-  alexa.appId = APP_ID;
-  alexa.resources = resources.languageStrings;
-  if (!event.session.sessionId || event.session['new']) {
-    const doc = new AWS.DynamoDB.DocumentClient({apiVersion: '2012-08-10'});
-    doc.get({TableName: 'War',
-            ConsistentRead: true,
-            Key: {userId: event.session.user.userId}},
-            (err, data) => {
-      if (err || (data.Item === undefined)) {
-        if (err) {
-          console.log('Error reading attributes ' + err);
-        } else {
-          request.post({url: process.env.SERVICEURL + 'war/newUser'}, (err, res, body) => {
-          });
-        }
-      } else {
-        Object.assign(event.session.attributes, data.Item.mapAttr);
-      }
-
-      execute();
-    });
-  } else {
-    execute();
-  }
-
-  function execute() {
-    alexa.registerHandlers(handlers, atWarHandlers, playingHandlers);
-    alexa.execute();
-  }
-}
-
-function saveState(userId, attributes) {
-  const formData = {};
-
-  formData.savedb = JSON.stringify({
-    userId: userId,
-    attributes: attributes,
-  });
-
-  const params = {
-    url: process.env.SERVICEURL + 'war/saveState',
-    formData: formData,
-  };
-
-  request.post(params, (err, res, body) => {
-    if (err) {
-      console.log(err);
+  const skillFunction = skillBuilder.addRequestHandlers(
+      Launch,
+      HighScore,
+      Help,
+      War,
+      NoWar,
+      Exit,
+      Repeat,
+      Bet,
+      PlaceSideBet,
+      RemoveSideBet,
+      SessionEnd,
+      Unhandled
+    )
+    .addErrorHandlers(ErrorHandler)
+    .addRequestInterceptors(requestInterceptor)
+    .addResponseInterceptors(saveResponseInterceptor)
+    .withTableName('CasinoWar')
+    .withAutoCreateTable(true)
+    .withSkillId('amzn1.ask.skill.af231135-5719-460a-85cc-af8b684c6069')
+    .lambda();
+  skillFunction(event, context, (err, response) => {
+    if (response) {
+      response.response = responseBuilder.getResponse();
     }
+    callback(err, response);
   });
 }
+

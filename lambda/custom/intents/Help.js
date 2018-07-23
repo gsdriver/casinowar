@@ -7,29 +7,35 @@
 const utils = require('../utils');
 
 module.exports = {
-  handleIntent: function() {
-    if (this.attributes.bot) {
-      utils.emitResponse(this, null, null,
-        this.t('HELP_BOT_COMMANDS'), this.t('HELP_BOT_COMMANDS'));
-    } else {
-      const game = this.attributes[this.attributes.currentGame];
+  canHandle: function(handlerInput) {
+    const request = handlerInput.requestEnvelope.request;
 
-      utils.readHand(this, true, (speech, reprompt) => {
-        let help;
-        const helpText = this.t('HELP_CARD_TEXT')
+    return ((request.type === 'IntentRequest') && (request.intent.name === 'AMAZON.HelpIntent'));
+  },
+  handle: function(handlerInput) {
+    const event = handlerInput.requestEnvelope;
+    const attributes = handlerInput.attributesManager.getSessionAttributes();
+    const res = require('../resources')(event.request.locale);
+
+    if (attributes.bot) {
+      handlerInput.responseBuilder
+        .speak(res.strings.HELP_BOT_COMMANDS)
+        .reprompt(res.strings.HELP_BOT_COMMANDS);
+    } else {
+      const game = attributes[attributes.currentGame];
+
+      utils.readHand(event, attributes, true, (speech, reprompt) => {
+        const helpText = res.strings.HELP_CARD_TEXT
           .replace('{0}', game.rules.minBet)
           .replace('{1}', game.rules.maxBet)
           .replace('{2}', game.rules.minBet)
           .replace('{3}', game.rules.maxBet);
+        const help = speech + res.strings.HELP_TEXT + reprompt;
 
-        if (this.attributes.bot) {
-          help = speech + helpText + ' ' + reprompt;
-        } else {
-          help = speech + this.t('HELP_TEXT') + reprompt;
-        }
-
-        utils.emitResponse(this, null, null,
-                help, reprompt, this.t('HELP_CARD_TITLE'), helpText);
+        handlerInput.responseBuilder
+          .speak(help)
+          .reprompt(reprompt)
+          .withSimpleCard(res.strings.HELP_CARD_TITLE, helpText);
       });
     }
   },

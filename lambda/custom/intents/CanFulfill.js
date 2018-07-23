@@ -30,35 +30,35 @@ module.exports = {
     // then we can just return immediately
     if (universalIntents.indexOf(event.request.intent.name) > -1) {
       execute(true);
-    }
-
-    // OK we're going to have to load state to see if this is valid
-    let userId;
-    if (event.context && event.context.System && event.context.System.user
-      && event.context.System.user.userId) {
-      userId = event.context.System.user.userId;
-    } else if (event.session && event.session.user && event.session.user.userId) {
-      userId = event.session.user.userId;
-    }
-
-    if (userId) {
-      const doc = new AWS.DynamoDB.DocumentClient({apiVersion: '2012-08-10'});
-      doc.get({TableName: 'War',
-              ConsistentRead: true,
-              Key: {userId: userId}},
-              (err, data) => {
-        if (err || (data.Item === undefined)) {
-          if (err) {
-            console.log('Error reading attributes ' + err);
-          }
-        } else {
-          Object.assign(attributes, data.Item.mapAttr);
-        }
-
-        execute();
-      });
     } else {
-      execute();
+      // OK we're going to have to load state to see if this is valid
+      let userId;
+      if (event.context && event.context.System && event.context.System.user
+        && event.context.System.user.userId) {
+        userId = event.context.System.user.userId;
+      } else if (event.session && event.session.user && event.session.user.userId) {
+        userId = event.session.user.userId;
+      }
+
+      if (userId) {
+        const doc = new AWS.DynamoDB.DocumentClient({apiVersion: '2012-08-10'});
+        doc.get({TableName: 'War',
+                ConsistentRead: true,
+                Key: {userId: userId}},
+                (err, data) => {
+          if (err || (data.Item === undefined)) {
+            if (err) {
+              console.log('Error reading attributes ' + err);
+            }
+          } else {
+            Object.assign(attributes, data.Item.mapAttr);
+          }
+
+          execute();
+        });
+      } else {
+        execute();
+      }
     }
 
     function execute(isValid) {

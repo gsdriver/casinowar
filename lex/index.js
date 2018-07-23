@@ -60,6 +60,16 @@ function passToAlexa(intentRequest, intentName, callback) {
       'timestamp': Date.now(),
     },
     'version': '1.0',
+    'context': {
+      'System': {
+        'application': {
+          'applicationId': 'amzn1.ask.skill.af231135-5719-460a-85cc-af8b684c6069'
+        },
+        'user': {
+          'userId': 'LEX-' + intentRequest.userId,
+        },
+      }
+    },
   };
 
   // Is this a LaunchRequest or intent?
