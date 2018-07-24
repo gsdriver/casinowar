@@ -91,7 +91,7 @@ module.exports = {
           speech += res.strings.BET_WINNER;
           game.bankroll += 2 * game.bet;
         } else {
-          speech += res.strings.BET_LOSE;
+          speech += res.strings.BET_LOSER;
         }
 
         // Reset bankroll if necessary

@@ -133,7 +133,7 @@ function runGame(event, context, callback) {
     .addErrorHandlers(ErrorHandler)
     .addRequestInterceptors(requestInterceptor)
     .addResponseInterceptors(saveResponseInterceptor)
-    .withTableName('CasinoWar')
+    .withTableName('War')
     .withAutoCreateTable(true)
     .withSkillId('amzn1.ask.skill.af231135-5719-460a-85cc-af8b684c6069')
     .lambda();
