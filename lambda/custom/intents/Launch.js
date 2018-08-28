@@ -30,18 +30,19 @@ module.exports = {
     // Are we playing or at war?
     if (utils.atWar(attributes)) {
       // Read the hand as well
-      utils.readHand(this, false, (hand, reprompt) => {
-        speech += (hand + reprompt);
-        handlerInput.responseBuilder
-          .speak(speech)
-          .reprompt(reprompt);
-      });
+      const hand = utils.readHand(event, attributes, false);
+      speech += (hand.speech + hand.reprompt);
+      return handlerInput.responseBuilder
+        .speak(speech)
+        .reprompt(hand.reprompt)
+        .getResponse();
     } else {
       const reprompt = res.strings.LAUNCH_REPROMPT;
       speech += reprompt;
-      handlerInput.responseBuilder
+      return handlerInput.responseBuilder
         .speak(speech)
-        .reprompt(reprompt);
+        .reprompt(reprompt)
+        .getResponse();
     }
   },
 };

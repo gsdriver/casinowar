@@ -62,8 +62,9 @@ module.exports = {
       speech += reprompt;
     }
 
-    handlerInput.responseBuilder
+    return handlerInput.responseBuilder
       .speak(speech)
-      .reprompt(reprompt);
+      .reprompt(reprompt)
+      .getResponse();
   },
 };

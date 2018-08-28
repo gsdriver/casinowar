@@ -19,23 +19,23 @@ module.exports = {
     const attributes = handlerInput.attributesManager.getSessionAttributes();
     const res = require('../resources')(event.request.locale);
 
-    utils.readHand(event, attributes, true, (speech, reprompt) => {
-      let output = '';
-      const game = attributes[attributes.currentGame];
+    const hand = utils.readHand(event, attributes, true);
+    let output = '';
+    const game = attributes[attributes.currentGame];
 
-      if (game.bet) {
-        if (game.sideBet) {
-          output = res.strings.READ_BET_AND_SIDEBET
-            .replace('{0}', game.bet)
-            .replace('{1}', game.sideBet);
-        } else {
-          output = res.strings.READ_BET.replace('{0}', game.bet);
-        }
+    if (game.bet) {
+      if (game.sideBet) {
+        output = res.strings.READ_BET_AND_SIDEBET
+          .replace('{0}', game.bet)
+          .replace('{1}', game.sideBet);
+      } else {
+        output = res.strings.READ_BET.replace('{0}', game.bet);
       }
-      output += (speech + reprompt);
-      handlerInput.responseBuilder
-        .speak(output)
-        .reprompt(reprompt);
-    });
+    }
+    output += (hand.speech + hand.reprompt);
+    return handlerInput.responseBuilder
+      .speak(output)
+      .reprompt(hand.reprompt)
+      .getResponse();
   },
 };

@@ -21,8 +21,9 @@ module.exports = {
     const game = attributes[attributes.currentGame];
 
     game.sideBet = undefined;
-    handlerInput.responseBuilder
+    return handlerInput.responseBuilder
       .speak(res.strings.SIDEBET_REMOVED)
-      .reprompt(res.strings.SIDEBET_REPROMPT);
+      .reprompt(res.strings.SIDEBET_REPROMPT)
+      .getResponse();
   },
 };

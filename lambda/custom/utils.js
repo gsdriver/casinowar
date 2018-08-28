@@ -122,7 +122,7 @@ module.exports = {
       .replace('{0}', ranks[card.rank - 1])
       .replace('{1}', suits[card.suit]);
   },
-  readHand: function(event, attributes, readBankroll, callback) {
+  readHand: function(event, attributes, readBankroll) {
     const res = require('./resources')(event.request.locale);
     let speech = '';
     let reprompt = '';
@@ -145,7 +145,7 @@ module.exports = {
       reprompt = res.strings.BET_PLAY_AGAIN;
     }
 
-    callback(speech, reprompt);
+    return {speech: speech, reprompt: reprompt};
   },
   sayDealtCards: function(event, attributes, playerCard, dealerCard, bet) {
     const res = require('./resources')(event.request.locale);
@@ -172,7 +172,7 @@ module.exports = {
         .replace('{1}', dealerText.replace('{0}', module.exports.sayCard(event, dealerCard)))
         .replace('{2}', bet);
   },
-  getBetAmount: function(event, attributes, callback) {
+  getBetAmount: function(event, attributes) {
     let reprompt;
     let speech;
     let amount;
@@ -209,7 +209,7 @@ module.exports = {
       }
     }
 
-    callback(amount, speech, reprompt);
+    return {amount: amount, speech: speech, reprompt: reprompt};
   },
   pickRandomOption: function(event, attributes, value) {
     const game = attributes[attributes.currentGame];

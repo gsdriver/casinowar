@@ -35,14 +35,17 @@ module.exports = {
     const res = require('../resources')(event.request.locale);
 
     if (attributes.bot) {
-      handlerInput.responseBuilder.speak(res.strings.EXIT_GAME.replace('{0}', ''));
+      return handlerInput.responseBuilder
+        .speak(res.strings.EXIT_GAME.replace('{0}', ''))
+        .getResponse();
     } else {
       return new Promise((resolve, reject) => {
         ads.getAd(attributes, 'war', event.request.locale, (adText) => {
-          handlerInput.responseBuilder
+          const response = handlerInput.responseBuilder
             .speak(res.strings.EXIT_GAME.replace('{0}', adText))
-            .withShouldEndSession(true);
-          resolve();
+            .withShouldEndSession(true)
+            .getResponse();
+          resolve(response);
         });
       });
     }

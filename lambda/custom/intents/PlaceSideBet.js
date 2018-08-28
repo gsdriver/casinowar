@@ -21,20 +21,20 @@ module.exports = {
 
     // The bet amount is optional - if not present we will use a default value
     // of either the last bet amount or the minimum bet
-    utils.getBetAmount(event, attributes, (amount, speechError, repromptError) => {
-      if (speechError) {
-        handlerInput.responseBuilder
-          .speak(speechError)
-          .reprompt(repromptError);
-        return;
-      }
+    const output = utils.getBetAmount(event, attributes);
+    if (output.speech) {
+      return handlerInput.responseBuilder
+        .speak(output.speech)
+        .reprompt(output.reprompt)
+        .getResponse();
+    }
 
-      const game = attributes[attributes.currentGame];
-      game.sideBet = amount;
-      const speech = res.strings.SIDEBET_PLACED.replace('{0}', game.sideBet);
-      handlerInput.responseBuilder
-        .speak(speech)
-        .reprompt(res.strings.SIDEBET_REPROMPT);
-    });
+    const game = attributes[attributes.currentGame];
+    game.sideBet = output.amount;
+    const speech = res.strings.SIDEBET_PLACED.replace('{0}', game.sideBet);
+    return handlerInput.responseBuilder
+      .speak(speech)
+      .reprompt(res.strings.SIDEBET_REPROMPT)
+      .getResponse();
   },
 };

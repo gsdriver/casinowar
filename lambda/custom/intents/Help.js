@@ -18,25 +18,26 @@ module.exports = {
     const res = require('../resources')(event.request.locale);
 
     if (attributes.bot) {
-      handlerInput.responseBuilder
+      return handlerInput.responseBuilder
         .speak(res.strings.HELP_BOT_COMMANDS)
-        .reprompt(res.strings.HELP_BOT_COMMANDS);
+        .reprompt(res.strings.HELP_BOT_COMMANDS)
+        .getResponse();
     } else {
       const game = attributes[attributes.currentGame];
 
-      utils.readHand(event, attributes, true, (speech, reprompt) => {
-        const helpText = res.strings.HELP_CARD_TEXT
-          .replace('{0}', game.rules.minBet)
-          .replace('{1}', game.rules.maxBet)
-          .replace('{2}', game.rules.minBet)
-          .replace('{3}', game.rules.maxBet);
-        const help = speech + res.strings.HELP_TEXT + reprompt;
+      const hand = utils.readHand(event, attributes, true);
+      const helpText = res.strings.HELP_CARD_TEXT
+        .replace('{0}', game.rules.minBet)
+        .replace('{1}', game.rules.maxBet)
+        .replace('{2}', game.rules.minBet)
+        .replace('{3}', game.rules.maxBet);
+      const help = hand.speech + res.strings.HELP_TEXT + hand.reprompt;
 
-        handlerInput.responseBuilder
-          .speak(help)
-          .reprompt(reprompt)
-          .withSimpleCard(res.strings.HELP_CARD_TITLE, helpText);
-      });
+      return handlerInput.responseBuilder
+        .speak(help)
+        .reprompt(hand.reprompt)
+        .withSimpleCard(res.strings.HELP_CARD_TITLE, helpText)
+        .getResponse();
     }
   },
 };
