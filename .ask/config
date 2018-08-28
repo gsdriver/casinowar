@@ -13,6 +13,19 @@
             }
           }
         }
+      },
+      "resources": {
+        "lambda": [
+          {
+            "arn": "arn:aws:lambda:us-east-1:129065607926:function:CasinoWar2",
+            "functionName": "arn:aws:lambda:us-east-1:129065607926:function:CasinoWar2",
+            "awsRegion": "us-east-1",
+            "alexaUsage": [
+              "custom/default"
+            ],
+            "revisionId": "157e4cbe-8b5e-4228-a7df-129db6312dd2"
+          }
+        ]
       }
     }
   }
