@@ -5,13 +5,14 @@
 'use strict';
 
 const utils = require('../utils');
+const voicehub = require('@voicehub/voicehub')(process.env.VOICEHUB_APPID, process.env.VOICEHUB_APIKEY);
 
 module.exports = {
   canHandle: function(handlerInput) {
     return handlerInput.requestEnvelope.session.new ||
       (handlerInput.requestEnvelope.request.type === 'LaunchRequest');
   },
-  handle: function(handlerInput) {
+  async handle(handlerInput) {
     const event = handlerInput.requestEnvelope;
     const attributes = handlerInput.attributesManager.getSessionAttributes();
     const res = require('../resources')(event.request.locale);
@@ -19,30 +20,33 @@ module.exports = {
     // Simple - welcome them to the game and have them bet
     let speech;
     const game = attributes[attributes.currentGame];
+    voicehub.setLocale(handlerInput);
+
+    // If we're at war, we need to read the hand as well
+    let handText = ' ';
+    let reprompt;
+    if (!utils.atWar(attributes)) {
+      // Read the hand as well
+      const hand = await utils.readHand(handlerInput, false);
+      handText = hand.speech;
+      reprompt = hand.reprompt;
+    }
 
     // Either welcome or welcome back
-    if (game.rounds) {
-      speech = res.strings.LAUNCH_WELCOME_BACK.replace('{0}', game.bankroll);
-    } else {
-      speech = res.strings.LAUNCH_WELCOME;
-    }
+    const postName = (game.rounds) ? 'WelcomeBack' : 'Welcome';
+    const post = await voicehub
+      .intent('LaunchRequest')
+      .post(postName)
+      .withParameters({
+        bankroll: game.bankroll,
+        hand: handText,
+      })
+      .get();
 
-    // Are we playing or at war?
-    if (utils.atWar(attributes)) {
-      // Read the hand as well
-      const hand = utils.readHand(event, attributes, false);
-      speech += (hand.speech + hand.reprompt);
-      return handlerInput.responseBuilder
-        .speak(speech)
-        .reprompt(hand.reprompt)
-        .getResponse();
-    } else {
-      const reprompt = res.strings.LAUNCH_REPROMPT;
-      speech += reprompt;
-      return handlerInput.responseBuilder
-        .speak(speech)
-        .reprompt(reprompt)
-        .getResponse();
-    }
+    reprompt = reprompt || post.reprompt;
+    return handlerInput.responseBuilder
+      .speak(post.speech)
+      .reprompt(reprompt)
+      .getResponse();
   },
 };

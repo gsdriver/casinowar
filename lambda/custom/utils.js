@@ -10,6 +10,7 @@ const request = require('request');
 const querystring = require('querystring');
 const speechUtils = require('alexa-speech-utils')();
 const seedrandom = require('seedrandom');
+const voicehub = require('@voicehub/voicehub')(process.env.VOICEHUB_APPID, process.env.VOICEHUB_APIKEY);
 
 module.exports = {
   initializeGame: function(event, attributes, game) {
@@ -113,39 +114,60 @@ module.exports = {
 
     console.log('Shuffle took ' + (Date.now() - start) + ' ms');
   },
-  sayCard: function(event, card) {
-    const res = require('./resources')(event.request.locale);
-    const suits = JSON.parse(res.strings.CARD_SUITS);
-    const ranks = res.strings.CARD_RANKS.split('|');
+  async sayCard(handlerInput, card) {
+    voicehub.setLocale(handlerInput);
+    const post = await voicehub
+      .intent('Utilities')
+      .post('CardName')
+      .get();
 
-    return res.strings.CARD_NAME
-      .replace('{0}', ranks[card.rank - 1])
-      .replace('{1}', suits[card.suit]);
+    let index = card.rank % 13;
+    if (index === 0) {
+      index = 13;
+    }
+    index += ('CDHS'.indexOf(card.suit) * 13);
+    index--;
+
+    console.log(card, index, post.card[index].replace('<speak>', '').replace('</speak>', ''));
+    return post.card[index].replace('<speak>', '').replace('</speak>', '');
   },
-  readHand: function(event, attributes, readBankroll) {
-    const res = require('./resources')(event.request.locale);
+  async readHand(handlerInput, readBankroll) {
     let speech = '';
     let reprompt = '';
+    const attributes = handlerInput.attributesManager.getSessionAttributes();
     const game = attributes[attributes.currentGame];
+    let postName;
+    let playerCard;
+    let dealerCard;
 
-    if (readBankroll) {
-      speech += res.strings.READ_BANKROLL.replace('{0}', game.bankroll);
-    }
+    // Post to read depends on whether to read bankroll
+    // and whether they are at war or not\
     if (module.exports.atWar(attributes)) {
-      // Repeat what they have
-      speech += res.strings.READ_CARDS
-        .replace('{0}', module.exports.sayCard(event, game.player[0]))
-        .replace('{1}', module.exports.sayCard(event, game.dealer[0]));
-      reprompt = res.strings.BET_REPROMPT_WAR;
-    } else if (game.player.length) {
-      // Repeat what they had
-      speech += res.strings.READ_OLD_CARDS
-        .replace('{0}', module.exports.sayCard(event, game.player[game.player.length - 1]))
-        .replace('{1}', module.exports.sayCard(event, game.dealer[game.dealer.length - 1]));
-      reprompt = res.strings.BET_PLAY_AGAIN;
+      postName = (readBankroll) ? 'ReadHandBankrollWar' : 'ReadHandWar';
+      playerCard = game.player[0];
+      dealerCard = game.dealer[0];
+    } else {
+      postName = (readBankroll) ? 'ReadHandBankroll' : 'ReadHand';
+      playerCard = game.player[game.player.length - 1];
+      dealerCard = game.dealer[game.dealer.length - 1];
     }
 
-    return {speech: speech, reprompt: reprompt};
+    voicehub.setLocale(handlerInput);
+    const card1 = await module.exports.sayCard(handlerInput, playerCard);
+    const card2 = await module.exports.sayCard(handlerInput, dealerCard);
+    const post = await voicehub
+      .intent('Utilities')
+      .post(postName)
+      .withParameters({
+        Bankroll: game.bankroll,
+        PlayerCard: card1,
+        DealerCard: card2,
+      })
+      .get();
+
+    const s = post.speech.replace('<speak>', '').replace('</speak>', '');
+    const r = post.reprompt.replace('<speak>', '').replace('</speak>', '');
+    return {speech: s, reprompt: r};
   },
   sayDealtCards: function(event, attributes, playerCard, dealerCard, bet) {
     const res = require('./resources')(event.request.locale);
