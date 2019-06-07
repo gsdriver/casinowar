@@ -5,6 +5,7 @@
 'use strict';
 
 const utils = require('../utils');
+const voicehub = require('@voicehub/voicehub')(process.env.VOICEHUB_APPID, process.env.VOICEHUB_APIKEY);
 
 module.exports = {
   canHandle: function(handlerInput) {
@@ -12,31 +13,41 @@ module.exports = {
 
     return ((request.type === 'IntentRequest') && (request.intent.name === 'AMAZON.HelpIntent'));
   },
-  handle: function(handlerInput) {
+  async handle(handlerInput) {
     const event = handlerInput.requestEnvelope;
     const attributes = handlerInput.attributesManager.getSessionAttributes();
-    const res = require('../resources')(event.request.locale);
 
+    voicehub.setLocale(handlerInput);
     if (attributes.bot) {
+      const post = await voicehub
+        .intent('AMAZON.HelpIntent')
+        .post('BotResponse')
+        .get();
+
       return handlerInput.responseBuilder
-        .speak(res.strings.HELP_BOT_COMMANDS)
-        .reprompt(res.strings.HELP_BOT_COMMANDS)
+        .speak(post.speech)
+        .reprompt(post.reprompt)
         .getResponse();
     } else {
       const game = attributes[attributes.currentGame];
 
-      const hand = utils.readHand(event, attributes, true);
-      const helpText = res.strings.HELP_CARD_TEXT
-        .replace('{0}', game.rules.minBet)
-        .replace('{1}', game.rules.maxBet)
-        .replace('{2}', game.rules.minBet)
-        .replace('{3}', game.rules.maxBet);
-      const help = hand.speech + res.strings.HELP_TEXT + hand.reprompt;
+      const hand = await utils.readHand(handlerInput, true);
+      const help = await voicehub
+        .intent('AMAZON.HelpIntent')
+        .post('HelpResponse')
+        .withParameters({
+          minbet: game.rules.minBet,
+          maxbet: game.rules.maxBet,
+          handtext: hand.speech,
+          handreprompt: hand.reprompt,
+        })
+        .get();
 
       return handlerInput.responseBuilder
-        .speak(help)
+        .speak(help.speech)
         .reprompt(hand.reprompt)
-        .withSimpleCard(res.strings.HELP_CARD_TITLE, helpText)
+        .withSimpleCard(help.cardtitle.replace('<speak>', '').replace('</speak>', ''),
+          help.cardtext.replace('<speak>', '').replace('</speak>', ''))
         .getResponse();
     }
   },
