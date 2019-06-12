@@ -20,6 +20,7 @@ const SessionEnd = require('./intents/SessionEnd');
 const Unhandled = require('./intents/Unhandled');
 const utils = require('./utils');
 const request = require('request');
+const ssmlCheck = require('ssml-check-core');
 
 const requestInterceptor = {
   process(handlerInput) {
@@ -62,21 +63,37 @@ const requestInterceptor = {
 
 const saveResponseInterceptor = {
   process(handlerInput) {
-    return new Promise((resolve, reject) => {
-      const response = handlerInput.responseBuilder.getResponse();
+    const response = handlerInput.responseBuilder.getResponse();
 
-      if (response) {
-        utils.drawTable(handlerInput, () => {
-          if (response.shouldEndSession) {
-            // We are meant to end the session
-            SessionEnd.handle(handlerInput);
-          }
-          resolve();
-        });
-      } else {
-        resolve();
-      }
-    });
+    if (response) {
+      return utils.drawTable(handlerInput, () => {
+        if (response.shouldEndSession) {
+          // We are meant to end the session
+          SessionEnd.handle(handlerInput);
+        }
+
+        if (response.outputSpeech && response.outputSpeech.ssml) {
+          return ssmlCheck.verifyAndFix(response.outputSpeech.ssml, {platform: 'amazon'});
+        } else {
+          return Promise.resolve({});
+        }
+      }).then((result) => {
+        if (result.fixedSSML) {
+          const oldSSML = response.outputSpeech.ssml;
+          response.outputSpeech.ssml = result.fixedSSML;
+
+          // Write to S3
+          const params = {
+            Body: oldSSML + ' became ' + result.fixedSSML,
+            Bucket: 'garrett-alexa-responses',
+            Key: 'war' + '/' + Date.now() + '.txt',
+          };
+          return s3.putObject(params).promise();
+        }
+      });
+    } else {
+      return Promise.resolve();
+    }
   },
 };
 
