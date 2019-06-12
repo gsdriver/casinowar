@@ -5,6 +5,7 @@
 'use strict';
 
 const utils = require('../utils');
+const voicehub = require('@voicehub/voicehub')(process.env.VOICEHUB_APPID, process.env.VOICEHUB_APIKEY);
 
 module.exports = {
   canHandle: function(handlerInput) {
@@ -14,28 +15,34 @@ module.exports = {
       ((request.intent.name === 'AMAZON.RepeatIntent') ||
        (request.intent.name === 'AMAZON.FallbackIntent')));
   },
-  handle: function(handlerInput) {
+  async handle(handlerInput) {
     const event = handlerInput.requestEnvelope;
     const attributes = handlerInput.attributesManager.getSessionAttributes();
-    const res = require('../resources')(event.request.locale);
-
-    const hand = utils.readHand(event, attributes, true);
-    let output = '';
     const game = attributes[attributes.currentGame];
 
+    voicehub.setLocale(handlerInput);
+    const hand = await utils.readHand(handlerInput, true);
+
     if (game.bet) {
-      if (game.sideBet) {
-        output = res.strings.READ_BET_AND_SIDEBET
-          .replace('{0}', game.bet)
-          .replace('{1}', game.sideBet);
-      } else {
-        output = res.strings.READ_BET.replace('{0}', game.bet);
-      }
+      const post = await voicehub
+        .intent('AMAZON.RepeatIntent')
+        .post((game.sideBet) ? 'RepeatSideBet' : 'RepeatBet')
+        .withParameters({
+          bet: game.bet,
+          sidebet: game.sideBet,
+          hand: hand.speech + hand.reprompt,
+        })
+        .get();
+
+      return handlerInput.responseBuilder
+        .speak(post.speech)
+        .reprompt(hand.reprompt)
+        .getResponse();
+    } else {
+      return handlerInput.responseBuilder
+        .speak(hand.speech + hand.reprompt)
+        .reprompt(hand.reprompt)
+        .getResponse();
     }
-    output += (hand.speech + hand.reprompt);
-    return handlerInput.responseBuilder
-      .speak(output)
-      .reprompt(hand.reprompt)
-      .getResponse();
   },
 };

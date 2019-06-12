@@ -6,6 +6,7 @@
 
 const utils = require('../utils');
 const ads = require('../ads');
+const voicehub = require('@voicehub/voicehub')(process.env.VOICEHUB_APPID, process.env.VOICEHUB_APIKEY);
 
 module.exports = {
   canHandle(handlerInput) {
@@ -29,25 +30,37 @@ module.exports = {
 
     return false;
   },
-  handle: function(handlerInput) {
+  async handle(handlerInput) {
     const event = handlerInput.requestEnvelope;
     const attributes = handlerInput.attributesManager.getSessionAttributes();
-    const res = require('../resources')(event.request.locale);
 
+    voicehub.setLocale(handlerInput);
     if (attributes.bot) {
+      const post = await voicehub
+        .intent('AMAZON.CancelIntent')
+        .post('Exit')
+        .withParameters({
+          ad: '',
+        })
+        .get();
+
       return handlerInput.responseBuilder
-        .speak(res.strings.EXIT_GAME.replace('{0}', ''))
+        .speak(post.speech)
         .getResponse();
     } else {
-      return new Promise((resolve, reject) => {
-        ads.getAd(attributes, 'war', event.request.locale, (adText) => {
-          const response = handlerInput.responseBuilder
-            .speak(res.strings.EXIT_GAME.replace('{0}', adText))
-            .withShouldEndSession(true)
-            .getResponse();
-          resolve(response);
-        });
-      });
+      adText = await ads.getAd(attributes, 'war', event.request.locale);
+      const post = await voicehub
+        .intent('AMAZON.CancelIntent')
+        .post('Exit')
+        .withParameters({
+          ad: adText,
+        })
+        .get();
+
+      return handlerInput.responseBuilder
+        .speak(post.speech)
+        .withShouldEndSession(true)
+        .getResponse();
     }
   },
 };

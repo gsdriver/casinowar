@@ -45,8 +45,6 @@ const dollar = {
   'BET_SAME_CARD_SIDEBET': 'You won ${0} from your side bet! ',
   'RESET_BANKROLL': 'You do not have enough to place the minimum bet. Resetting bankroll to ${0}. ',
   // From Repeat.js
-  'READ_BET': 'You are betting ${0} a hand. ',
-  'READ_BET_AND_SIDEBET': 'You are betting ${0} with a ${1} side bet each hand. ',
   'READ_BANKROLL': 'You have ${0}. ',
   // From Sidebet.js
   'SIDEBET_PLACED': '${0} side bet placed which pays ten to one on a tie. The side bet will remain in play until you say remove side bet. ',
@@ -67,8 +65,6 @@ const pound = {
   'BET_SAME_CARD_SIDEBET': 'You won £{0} from your side bet! ',
   'RESET_BANKROLL': 'You do not have enough to place the minimum bet. Resetting bankroll to £{0}. ',
   // From Repeat.js
-  'READ_BET': 'You are betting £{0} a hand. ',
-  'READ_BET_AND_SIDEBET': 'You are betting £{0} with a £{1} side bet each hand. ',
   'READ_BANKROLL': 'You have £{0}. ',
   // From Sidebet.js
   'SIDEBET_PLACED': '£{0} side bet placed which pays ten to one on a tie. The side bet will remain in play until you say remove side bet. ',
