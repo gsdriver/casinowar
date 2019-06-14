@@ -6,7 +6,7 @@
 
 const AWS = require('aws-sdk');
 AWS.config.update({region: 'us-east-1'});
-const request = require('request');
+const rp = require('request-promise');
 const querystring = require('querystring');
 const speechUtils = require('alexa-speech-utils')();
 const seedrandom = require('seedrandom');
@@ -32,7 +32,7 @@ module.exports = {
     module.exports.shuffleDeck(newGame, event.session.user.userId);
     attributes[attributes.currentGame] = newGame;
   },
-  readLeaderBoard: function(handlerInput, callback) {
+  readLeaderBoard: function(handlerInput) {
     const event = handlerInput.requestEnvelope;
     const attributes = handlerInput.attributesManager.getSessionAttributes();
     const game = attributes[attributes.currentGame];
@@ -50,38 +50,37 @@ module.exports = {
       leaderURL += '?' + paramText;
     }
 
-    request(
+    return rp(
       {
         uri: leaderURL,
         method: 'GET',
         timeout: 1000,
-      }, (err, response, body) => {
-      if (err) {
-        // No scores to read
+      }
+    ).then((body) => {
+      const leaders = JSON.parse(body);
+
+      if (!leaders.count || !leaders.top) {
+        // Something went wrong
         speech = res.strings.LEADER_NO_SCORES;
       } else {
-        const leaders = JSON.parse(body);
-
-        if (!leaders.count || !leaders.top) {
-          // Something went wrong
-          speech = res.strings.LEADER_NO_SCORES;
-        } else {
-          if (leaders.rank) {
-            speech += res.strings.LEADER_BANKROLL_RANKING
-              .replace('{0}', game.bankroll)
-              .replace('{1}', leaders.rank)
-              .replace('{2}', roundPlayers(event, leaders.count));
-          }
-
-          // And what is the leader board?
-          let topScores = leaders.top;
-          topScores = topScores.map((x) => res.strings.LEADER_BANKROLL_FORMAT.replace('{0}', x));
-          speech += res.strings.LEADER_TOP_BANKROLLS.replace('{0}', topScores.length);
-          speech += speechUtils.and(topScores, {locale: event.request.locale, pause: '300ms'});
+        if (leaders.rank) {
+          speech += res.strings.LEADER_BANKROLL_RANKING
+            .replace('{0}', game.bankroll)
+            .replace('{1}', leaders.rank)
+            .replace('{2}', roundPlayers(event, leaders.count));
         }
+
+        // And what is the leader board?
+        let topScores = leaders.top;
+        topScores = topScores.map((x) => res.strings.LEADER_BANKROLL_FORMAT.replace('{0}', x));
+        speech += res.strings.LEADER_TOP_BANKROLLS.replace('{0}', topScores.length);
+        speech += speechUtils.and(topScores, {locale: event.request.locale, pause: '300ms'});
       }
 
-      callback(speech);
+      return speech;
+    }).catch((err) => {
+      console.log(err);
+      return res.strings.LEADER_NO_SCORES;
     });
   },
   shuffleDeck: function(game, userId) {
@@ -169,37 +168,64 @@ module.exports = {
     const r = post.reprompt.replace('<speak>', '').replace('</speak>', '');
     return {speech: s, reprompt: r};
   },
-  sayDealtCards: function(event, attributes, playerCard, dealerCard, bet) {
-    const res = require('./resources')(event.request.locale);
-    const format = (bet ? res.strings.BET_CARDS_SAYBET : res.strings.BET_CARDS);
-    let playerText;
-    let dealerText;
+  async sayDealtCards(handlerInput, playerCard, dealerCard, bet) {
+    const event = handlerInput.requestEnvelope;
+    const attributes = handlerInput.attributesManager.getSessionAttributes();
+    let playerPost;
+    let dealerPost;
 
+    voicehub.setLocale(handlerInput);
     if (playerCard.rank > 10) {
-      playerText = module.exports.pickRandomOption(event, attributes, 'GOOD_PLAYER_CARD');
+      playerPost = 'PlayerGoodCard';
     } else if (playerCard.rank < 5) {
-      playerText = module.exports.pickRandomOption(event, attributes, 'BAD_PLAYER_CARD');
+      playerPost = 'PlayerBadCard';
     } else {
-      playerText = module.exports.pickRandomOption(event, attributes, 'NORMAL_PLAYER_CARD');
+      playerPost = 'PlayerNormalCard';
     }
 
     if ((dealerCard.rank > playerCard.rank) && (playerCard.rank > 10)) {
-      dealerText = module.exports.pickRandomOption(event, attributes, 'DEALER_TOUGH_BEAT');
+      dealerPost = 'DealerToughCard';
     } else {
-      dealerText = module.exports.pickRandomOption(event, attributes, 'DEALER_CARD');
+      dealerPost = 'DealerCard';
     }
 
-    return format
-        .replace('{0}', playerText.replace('{0}', module.exports.sayCard(event, playerCard)))
-        .replace('{1}', dealerText.replace('{0}', module.exports.sayCard(event, dealerCard)))
-        .replace('{2}', bet);
+    const card1 = await module.exports.sayCard(event, playerCard);
+    const card2 = await module.exports.sayCard(event, dealerCard);
+
+    const playerText = await voicehub
+      .intent('Utilities')
+      .post(playerPost)
+      .withParameters({
+        card: card1,
+      })
+      .get();
+    const dealerText = await voicehub
+      .intent('Utilities')
+      .post(dealerPost)
+      .withParameters({
+        card: card2,
+      })
+      .get();
+
+    const post = await voicehub
+      .intent('Utilities')
+      .post(bet ? 'DealTheCardsWithBet' : 'DealTheCards')
+      .withParameters({
+        card1: module.exports.pickRandomOption(handlerInput, playerText.speech),
+        card2: module.exports.pickRandomOption(handlerInput, dealerText.speech),
+        bet: bet,
+        dealsound: '<audio src="https://s3-us-west-2.amazonaws.com/alexasoundclips/dealcard.mp3"/>',
+      })
+      .get();
+
+    return post.speech;
   },
-  getBetAmount: function(event, attributes) {
-    let reprompt;
-    let speech;
+  async getBetAmount(handlerInput) {
     let amount;
+    let post;
+    const event = handlerInput.requestEnvelope;
+    const attributes = handlerInput.attributesManager.getSessionAttributes();
     const game = attributes[attributes.currentGame];
-    const res = require('./resources')(event.request.locale);
 
     if (event.request.intent.slots && event.request.intent.slots.Amount
       && event.request.intent.slots.Amount.value) {
@@ -215,40 +241,52 @@ module.exports = {
       amount = game.rules.minBet;
     }
 
+    voicehub.setLocale(handlerInput);
     if (amount > game.rules.maxBet) {
-      speech = res.strings.BET_EXCEEDS_MAX.replace('{0}', game.rules.maxBet);
-      reprompt = res.strings.BET_INVALID_REPROMPT;
+      post = await voicehub
+        .intent('Utilities')
+        .post('MaxBetAmount')
+        .withParameters({
+          bet: game.rules.maxBet,
+        })
+        .get();
     } else if (amount < game.rules.minBet) {
-      speech = res.strings.BET_LESSTHAN_MIN.replace('{0}', game.rules.minBet);
-      reprompt = res.strings.BET_INVALID_REPROMPT;
+      post = await voicehub
+        .intent('Utilities')
+        .post('MinBetAmount')
+        .withParameters({
+          bet: game.rules.minBet,
+        })
+        .get();
     } else if (amount > game.bankroll) {
       if (game.bankroll >= game.rules.minBet) {
         amount = game.bankroll;
       } else {
         // Oops, you can't bet this much
-        speech = res.strings.BET_EXCEEDS_BANKROLL.replace('{0}', game.bankroll);
-        reprompt = res.strings.BET_INVALID_REPROMPT;
+        post = await voicehub
+          .intent('Utilities')
+          .post('BetExceedsBankroll')
+          .withParameters({
+            bet: game.bankroll,
+          })
+          .get();
       }
     }
 
-    return {amount: amount, speech: speech, reprompt: reprompt};
+    return {amount: amount, speech: (post) ? post.speech : undefined, reprompt: (post) ? post.reprompt : undefined};
   },
-  pickRandomOption: function(event, attributes, value) {
+  pickRandomOption: function(handlerInput, options) {
+    const event = handlerInput.requestEnvelope;
+    const attributes = handlerInput.attributesManager.getSessionAttributes();
     const game = attributes[attributes.currentGame];
-    const res = require('./resources')(event.request.locale);
 
-    if (res && res.strings[value]) {
-      const options = res.strings[value].split('|');
-      const randomValue = seedrandom(event.session.user.userId + (game.timestamp ? game.timestamp : ''))();
-      const choice = Math.floor(randomValue * options.length);
-      if (choice == options.length) {
-        choice--;
-      }
-
-      return options[choice];
-    } else {
-      return undefined;
+    const randomValue = seedrandom(event.session.user.userId + (game.timestamp ? game.timestamp : ''))();
+    const choice = Math.floor(randomValue * options.length);
+    if (choice == options.length) {
+      choice--;
     }
+
+    return options[choice];
   },
   atWar: function(attributes) {
     const game = attributes[attributes.currentGame];
@@ -256,7 +294,7 @@ module.exports = {
       && (game.player[0].rank == game.dealer[0].rank)
       && (game.specialState !== 'surrender'));
   },
-  drawTable: function(handlerInput, callback) {
+  drawTable: function(handlerInput) {
     const response = handlerInput.responseBuilder;
     const event = handlerInput.requestEnvelope;
     const attributes = handlerInput.attributesManager.getSessionAttributes();
@@ -285,32 +323,26 @@ module.exports = {
 
       const params = {
         url: process.env.SERVICEURL + 'war/drawImage',
+        method: 'POST',
         formData: formData,
         timeout: 3000,
       };
 
-      request.post(params, (err, res, body) => {
-        if (err) {
-          console.log(err);
-          callback(err);
-        } else {
-          const imageUrl = JSON.parse(body).file;
-          const end = Date.now();
-          console.log('Drawing table took ' + (end - start) + ' ms');
+      return rp(params).then((body) => {
+        const imageUrl = JSON.parse(body).file;
+        const end = Date.now();
+        console.log('Drawing table took ' + (end - start) + ' ms');
 
-          response.addRenderTemplateDirective({
-            type: 'BodyTemplate6',
-            backButton: 'HIDDEN',
-            backgroundImage: {sources: [{url: imageUrl, widthPixels: 0, heightPixels: 0}]},
-            title: '',
-          });
-
-          callback();
-        }
+        response.addRenderTemplateDirective({
+          type: 'BodyTemplate6',
+          backButton: 'HIDDEN',
+          backgroundImage: {sources: [{url: imageUrl, widthPixels: 0, heightPixels: 0}]},
+          title: '',
+        });
       });
     } else {
       // Not a display device
-      callback();
+      return Promise.resolve();
     }
   },
 };

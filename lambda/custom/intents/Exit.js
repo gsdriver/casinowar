@@ -48,7 +48,7 @@ module.exports = {
         .speak(post.speech)
         .getResponse();
     } else {
-      adText = await ads.getAd(attributes, 'war', event.request.locale);
+      const adText = await ads.getAd(attributes, 'war', event.request.locale);
       const post = await voicehub
         .intent('AMAZON.CancelIntent')
         .post('Exit')

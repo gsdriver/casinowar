@@ -66,7 +66,7 @@ const saveResponseInterceptor = {
     const response = handlerInput.responseBuilder.getResponse();
 
     if (response) {
-      return utils.drawTable(handlerInput, () => {
+      return utils.drawTable(handlerInput).then(() => {
         if (response.shouldEndSession) {
           // We are meant to end the session
           SessionEnd.handle(handlerInput);
@@ -118,6 +118,7 @@ if (process.env.DASHBOTKEY) {
 
 function runGame(event, context, callback) {
   const skillBuilder = Alexa.SkillBuilders.standard();
+  const start = Date.now();
 
   if (!process.env.NOLOG) {
     console.log(JSON.stringify(event));
@@ -151,6 +152,7 @@ function runGame(event, context, callback) {
     .withSkillId('amzn1.ask.skill.af231135-5719-460a-85cc-af8b684c6069')
     .lambda();
   skillFunction(event, context, (err, response) => {
+    console.log('Took ' + (Date.now() - start) + ' ms');
     callback(err, response);
   });
 }

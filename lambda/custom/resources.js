@@ -6,13 +6,8 @@ const common = {
   'UNKNOWN_INTENT': 'Sorry, I didn\'t get that. Try saying Help.',
   'UNKNOWN_INTENT_REPROMPT': 'Try saying Help.',
   // From Bet.js
-  'BET_INVALID_AMOUNT': 'I\'m sorry, {0} is not a valid amount to bet.',
-  'BET_INVALID_REPROMPT': 'What else can I help you with?',
-  'BET_CARDS': '<audio src=\"https://s3-us-west-2.amazonaws.com/alexasoundclips/dealcard.mp3\"/> {0} <audio src=\"https://s3-us-west-2.amazonaws.com/alexasoundclips/dealcard.mp3\"/> and {1}. ',
-  'BET_SAME_CARD': 'It\'s a tie! ',
   'BET_WINNER': 'You won! ',
   'BET_LOSER': 'You lose! ',
-  'BET_REPROMPT_WAR': 'Say yes to go to war or no to surrender. ',
   'BET_PLAY_AGAIN': 'Would you like to play again? ',
   // From Exit.js
   'EXIT_GAME': '{0} Goodbye.',
@@ -38,11 +33,6 @@ const common = {
 // Used for dollar-specific languages
 const dollar = {
   // From Bet.js
-  'BET_EXCEEDS_MAX': 'Sorry, this bet exceeds the maximum bet of ${0}.',
-  'BET_LESSTHAN_MIN': 'Sorry, this bet is less than the minimum bet of ${0}.',
-  'BET_EXCEEDS_BANKROLL': 'Sorry, this bet exceeds your bankroll of ${0}.',
-  'BET_CARDS_SAYBET': 'You bet ${2} <audio src=\"https://s3-us-west-2.amazonaws.com/alexasoundclips/dealcard.mp3\"/> {0} <audio src=\"https://s3-us-west-2.amazonaws.com/alexasoundclips/dealcard.mp3\"/> and {1}. ',
-  'BET_SAME_CARD_SIDEBET': 'You won ${0} from your side bet! ',
   'RESET_BANKROLL': 'You do not have enough to place the minimum bet. Resetting bankroll to ${0}. ',
   // From Repeat.js
   'READ_BANKROLL': 'You have ${0}. ',
@@ -58,11 +48,6 @@ const dollar = {
 // Same strings as above but with £
 const pound = {
   // From Bet.js
-  'BET_EXCEEDS_MAX': 'Sorry, this bet exceeds the maximum bet of £{0}.',
-  'BET_LESSTHAN_MIN': 'Sorry, this bet is less than the minimum bet of £{0}.',
-  'BET_EXCEEDS_BANKROLL': 'Sorry, this bet exceeds your bankroll of £{0}.',
-  'BET_CARDS_SAYBET': 'You bet £{2} <audio src=\"https://s3-us-west-2.amazonaws.com/alexasoundclips/dealcard.mp3\"/> {0} <audio src=\"https://s3-us-west-2.amazonaws.com/alexasoundclips/dealcard.mp3\"/> and {1}. ',
-  'BET_SAME_CARD_SIDEBET': 'You won £{0} from your side bet! ',
   'RESET_BANKROLL': 'You do not have enough to place the minimum bet. Resetting bankroll to £{0}. ',
   // From Repeat.js
   'READ_BANKROLL': 'You have £{0}. ',
@@ -77,12 +62,6 @@ const pound = {
 
 // Informal strings - using me and I
 const informal = {
-  // From Bet.js
-  'GOOD_PLAYER_CARD': 'You got {0}|You got {0}|Look a {0}|{0} <break time=\'200ms\'/> nice',
-  'NORMAL_PLAYER_CARD': 'You got {0}|You got {0}|Here\'s a {0} for you',
-  'BAD_PLAYER_CARD': 'You got {0}|You got {0}|{0} <break time=\'400ms\'/> sorry|sorry it\'s a {0}',
-  'DEALER_CARD': 'I got {0}|I got {0}|{0} for me',
-  'DEALER_TOUGH_BEAT': 'I got {0}|I got {0}|Ouch a {0} for me|{0} for me <break time=\'200ms\'/> close one',
   // From Repeat.js
   'READ_CARDS': 'You have {0} and I have {1}. You are at war. ',
   'READ_OLD_CARDS': 'You had {0} and I had {1}. ',
@@ -90,12 +69,6 @@ const informal = {
 
 // Formal strings - calling out the dealer in third person
 const formal = {
-  // From Bet.js
-  'GOOD_PLAYER_CARD': 'You got {0}|You got {0}|{0} <break time=\'200ms\'/> nice',
-  'NORMAL_PLAYER_CARD': 'You got {0}|You got {0}|Here\'s a {0} for you',
-  'BAD_PLAYER_CARD': 'You got {0}|You got {0}|{0} <break time=\'400ms\'/> sorry|sorry it\'s a {0}',
-  'DEALER_CARD': 'The dealer got {0}|The dealer got {0}|{0} for the dealer',
-  'DEALER_TOUGH_BEAT': 'The dealer got {0}|The dealer got {0}|Ouch a {0} for the dealer|{0} for the dealer <break time=\'200ms\'/> close one',
   // From Repeat.js
   'READ_CARDS': 'You have {0} and the dealer has {1}. You are at war. ',
   'READ_OLD_CARDS': 'You had {0} and the dealer had {1}. ',

@@ -10,6 +10,7 @@
     "aws-sdk": "^2.28.0",
     "dashbot": "^10.4.1",
     "request": "^2.85.0",
+    "request-promise": "^4.2.4",
     "seedrandom": "^2.4.3",
     "ssml-check-core": "^0.2.0"
   },

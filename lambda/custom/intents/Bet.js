@@ -6,6 +6,7 @@
 
 const utils = require('../utils');
 const seedrandom = require('seedrandom');
+const voicehub = require('@voicehub/voicehub')(process.env.VOICEHUB_APPID, process.env.VOICEHUB_APIKEY);
 
 module.exports = {
   canHandle(handlerInput) {
@@ -16,14 +17,16 @@ module.exports = {
       && ((request.intent.name === 'BetIntent')
         || (request.intent.name === 'AMAZON.YesIntent')));
   },
-  handle: function(handlerInput) {
+  async handle(handlerInput) {
     const event = handlerInput.requestEnvelope;
     const attributes = handlerInput.attributesManager.getSessionAttributes();
-    const res = require('../resources')(event.request.locale);
+    let post;
+    let postName;
 
     // The bet amount is optional - if not present we will use a default value
     // of either the last bet amount or the minimum bet
-    const output = utils.getBetAmount(event, attributes);
+    voicehub.setLocale(handlerInput);
+    const output = await utils.getBetAmount(handlerInput);
     if (output.speech) {
       return handlerInput.responseBuilder
         .speak(output.speech)
@@ -60,53 +63,66 @@ module.exports = {
     if (process.env.FORCETIE) {
       game.dealer[0].rank = game.player[0].rank;
     }
-    speech = utils.sayDealtCards(event, attributes, game.player[0], game.dealer[0],
-        (sayBet) ? game.bet : undefined);
+    speech = await utils.sayDealtCards(handlerInput, game.player[0], game.dealer[0], (sayBet) ? game.bet : undefined);
 
     // If these are the same rank - you have a war!
     if (game.player[0].rank == game.dealer[0].rank) {
       // If the side bet was placed, let them know it won
       // We have 6 audio files to choose from
       const warSounds = parseInt(process.env.WARCOUNT);
+      let warSound = '';
+      postName = 'War';
       if (!isNaN(warSounds) && !attributes.bot) {
         const randomValue = seedrandom(event.session.user.userId + (game.timestamp ? game.timestamp : ''))();
         const choice = 1 + Math.floor(randomValue * warSounds);
         if (choice > warSounds) {
           choice--;
         }
-        speech += `<audio src="https://s3-us-west-2.amazonaws.com/alexasoundclips/war/war${choice}.mp3"/> `;
-      } else {
-        speech += res.strings.BET_SAME_CARD;
+        warSound = `<audio src="https://s3-us-west-2.amazonaws.com/alexasoundclips/war/war${choice}.mp3"/>`;
+        postName += 'Sound';
       }
 
       if (sideBetPlaced) {
+        postName += 'SideBet';
         game.bankroll += 10 * game.sideBet;
-        speech += res.strings.BET_SAME_CARD_SIDEBET.replace('{0}', 10 * game.sideBet);
       }
-      reprompt = res.strings.BET_REPROMPT_WAR;
+
+      post = await voicehub
+        .intent('BetIntent')
+        .post(postName)
+        .withParameters({
+          warsound: warSound,
+          sidebet: 10 * game.sideBet,
+        })
+        .get();
     } else {
       // OK, who won?
       if (game.player[0].rank > game.dealer[0].rank) {
         // You won!
-        speech += res.strings.BET_WINNER;
+        postName = 'BetWinner';
         game.bankroll += 2 * game.bet;
       } else {
-        speech += res.strings.BET_LOSER;
+        postName = 'BetLoser';
       }
 
       // Reset bankroll if necessary
       if ((game.bankroll < game.rules.minBet) && game.rules.canReset) {
         game.bankroll = game.startingBankroll;
-        speech += res.strings.RESET_BANKROLL.replace('{0}', game.bankroll);
+        postName = 'BetBankrupt';
       }
 
-      reprompt = res.strings.BET_PLAY_AGAIN;
+      post = await voicehub
+        .intent('BetIntent')
+        .post(postName)
+        .withParameters({
+          bankroll: game.bankroll,
+        })
+        .get();
     }
-    speech += reprompt;
 
     return handlerInput.responseBuilder
-      .speak(speech)
-      .reprompt(reprompt)
+      .speak(speech + ' ' + post.speech)
+      .reprompt(post.reprompt)
       .getResponse();
   },
 };
