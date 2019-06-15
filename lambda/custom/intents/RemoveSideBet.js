@@ -5,6 +5,7 @@
 'use strict';
 
 const utils = require('../utils');
+const voicehub = require('@voicehub/voicehub')(process.env.VOICEHUB_APPID, process.env.VOICEHUB_APIKEY);
 
 module.exports = {
   canHandle(handlerInput) {
@@ -14,16 +15,21 @@ module.exports = {
     return (!utils.atWar(attributes) && (request.type === 'IntentRequest')
       && (request.intent.name === 'RemoveSideBetIntent'));
   },
-  handle: function(handlerInput) {
+  async handle(handlerInput) {
     const event = handlerInput.requestEnvelope;
     const attributes = handlerInput.attributesManager.getSessionAttributes();
-    const res = require('../resources')(event.request.locale);
     const game = attributes[attributes.currentGame];
 
+    voicehub.setLocale(handlerInput);
     game.sideBet = undefined;
+    const post = await voicehub
+      .intent('SideBetIntent')
+      .post('RemoveSideBet')
+      .get();
+
     return handlerInput.responseBuilder
-      .speak(res.strings.SIDEBET_REMOVED)
-      .reprompt(res.strings.SIDEBET_REPROMPT)
+      .speak(post.speech)
+      .reprompt(post.reprompt)
       .getResponse();
   },
 };

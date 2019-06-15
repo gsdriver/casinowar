@@ -4,17 +4,24 @@
 
 'use strict';
 
+const voicehub = require('@voicehub/voicehub')(process.env.VOICEHUB_APPID, process.env.VOICEHUB_APIKEY);
+
 module.exports = {
   canHandle: function(handlerInput) {
     return true;
   },
-  handle: function(handlerInput) {
+  async handle(handlerInput) {
     const event = handlerInput.requestEnvelope;
-    const res = require('../resources')(event.request.locale);
+
+    voicehub.setLocale(handlerInput);
+    const post = await voicehub
+      .intent('UnknownIntent')
+      .post('Unknown')
+      .get();
 
     return handlerInput.responseBuilder
-      .speak(res.strings.UNKNOWN_INTENT)
-      .reprompt(res.strings.UNKNOWN_INTENT_REPROMPT)
+      .speak(post.speech)
+      .reprompt(post.reprompt)
       .getResponse();
   },
 };

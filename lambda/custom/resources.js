@@ -2,15 +2,10 @@
 
 // Shared between all languages
 const common = {
-  // From index.js
-  'UNKNOWN_INTENT': 'Sorry, I didn\'t get that. Try saying Help.',
-  'UNKNOWN_INTENT_REPROMPT': 'Try saying Help.',
   // From Bet.js
   'BET_WINNER': 'You won! ',
   'BET_LOSER': 'You lose! ',
   'BET_PLAY_AGAIN': 'Would you like to play again? ',
-  // From Exit.js
-  'EXIT_GAME': '{0} Goodbye.',
   // From HighScore.js
   'HIGHSCORE_REPROMPT': 'What else can I help you with?',
   // From SideBet.js
@@ -25,9 +20,6 @@ const common = {
   'GENERIC_REPROMPT': 'What else can I help with?',
   'LEADER_NO_SCORES': 'Sorry, I\'m unable to read the current leader board',
   'LEADER_TOP_BANKROLLS': 'The top {0} bankrolls are ',
-  'CARD_RANKS': 'one|two|three|four|five|six|seven|eight|nine|ten|jack|queen|king|ace',
-  'CARD_SUITS': '{"C":"clubs","D":"diamonds","H":"hearts","S":"spades"}',
-  'CARD_NAME': '{0} of {1}',
 };
 
 // Used for dollar-specific languages
@@ -36,8 +28,6 @@ const dollar = {
   'RESET_BANKROLL': 'You do not have enough to place the minimum bet. Resetting bankroll to ${0}. ',
   // From Repeat.js
   'READ_BANKROLL': 'You have ${0}. ',
-  // From Sidebet.js
-  'SIDEBET_PLACED': '${0} side bet placed which pays ten to one on a tie. The side bet will remain in play until you say remove side bet. ',
   // From War.js
   'WAR_TIE_WINNER': 'It\'s another tie - you win ${0}! ',
   // From utils.js
@@ -51,8 +41,6 @@ const pound = {
   'RESET_BANKROLL': 'You do not have enough to place the minimum bet. Resetting bankroll to £{0}. ',
   // From Repeat.js
   'READ_BANKROLL': 'You have £{0}. ',
-  // From Sidebet.js
-  'SIDEBET_PLACED': '£{0} side bet placed which pays ten to one on a tie. The side bet will remain in play until you say remove side bet. ',
   // From War.js
   'WAR_TIE_WINNER': 'It\'s another tie - you win £{0}! ',
   // From utils.js

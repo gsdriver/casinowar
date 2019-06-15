@@ -5,6 +5,7 @@
 'use strict';
 
 const utils = require('../utils');
+const voicehub = require('@voicehub/voicehub')(process.env.VOICEHUB_APPID, process.env.VOICEHUB_APIKEY);
 
 module.exports = {
   canHandle(handlerInput) {
@@ -14,14 +15,14 @@ module.exports = {
     return (!utils.atWar(attributes) && (request.type === 'IntentRequest')
       && (request.intent.name === 'PlaceSideBetIntent'));
   },
-  handle: function(handlerInput) {
+  async handle(handlerInput) {
     const event = handlerInput.requestEnvelope;
     const attributes = handlerInput.attributesManager.getSessionAttributes();
-    const res = require('../resources')(event.request.locale);
 
     // The bet amount is optional - if not present we will use a default value
     // of either the last bet amount or the minimum bet
-    const output = utils.getBetAmount(event, attributes);
+    voicehub.setLocale(handlerInput);
+    const output = await utils.getBetAmount(event, attributes);
     if (output.speech) {
       return handlerInput.responseBuilder
         .speak(output.speech)
@@ -31,10 +32,17 @@ module.exports = {
 
     const game = attributes[attributes.currentGame];
     game.sideBet = output.amount;
-    const speech = res.strings.SIDEBET_PLACED.replace('{0}', game.sideBet);
+    const post = await voicehub
+      .intent('SideBetIntent')
+      .post('PlaceSideBet')
+      .withParameters({
+        bet: game.sideBet,
+      })
+      .get();
+
     return handlerInput.responseBuilder
-      .speak(speech)
-      .reprompt(res.strings.SIDEBET_REPROMPT)
+      .speak(post.speech)
+      .reprompt(post.reprompt)
       .getResponse();
   },
 };
