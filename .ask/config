@@ -2,28 +2,51 @@
   "deploy_settings": {
     "default": {
       "skill_id": "amzn1.ask.skill.af231135-5719-460a-85cc-af8b684c6069",
-      "was_cloned": true,
+      "was_cloned": false,
       "merge": {
         "manifest": {
           "apis": {
             "custom": {
               "endpoint": {
-                "uri": "arn:aws:lambda:us-east-1:129065607926:function:CasinoWar2"
+                "uri": "arn:aws:lambda:us-east-1:129065607926:function:CasinoWar3"
               }
             }
           }
         }
       },
       "resources": {
+        "manifest": {
+          "eTag": "0f208cbd6f1583a731aa0a5c91437b41"
+        },
+        "interactionModel": {
+          "en-AU": {
+            "eTag": "c4d848bacaa64ca75b6fc261ca0e843f"
+          },
+          "en-CA": {
+            "eTag": "c4d848bacaa64ca75b6fc261ca0e843f"
+          },
+          "en-IN": {
+            "eTag": "c4d848bacaa64ca75b6fc261ca0e843f"
+          },
+          "en-GB": {
+            "eTag": "700a65eacd5a27fab55a3bc51877a8a2"
+          },
+          "en-US": {
+            "eTag": "68c41a158483b5208f4df5d5cf7a2ed9"
+          }
+        },
         "lambda": [
           {
-            "arn": "arn:aws:lambda:us-east-1:129065607926:function:CasinoWar2",
-            "functionName": "arn:aws:lambda:us-east-1:129065607926:function:CasinoWar2",
-            "awsRegion": "us-east-1",
             "alexaUsage": [
               "custom/default"
             ],
-            "revisionId": "157e4cbe-8b5e-4228-a7df-129db6312dd2"
+            "arn": "arn:aws:lambda:us-east-1:129065607926:function:CasinoWar3",
+            "awsRegion": "us-east-1",
+            "codeUri": "lambda/custom",
+            "functionName": "CasinoWar3",
+            "handler": "index.handler",
+            "revisionId": "b8e1b9be-74e8-43b4-b0e4-e4b7f992c6d3",
+            "runtime": "nodejs10.x"
           }
         ]
       }
