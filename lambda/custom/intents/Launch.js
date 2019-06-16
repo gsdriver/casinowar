@@ -15,7 +15,6 @@ module.exports = {
   async handle(handlerInput) {
     const event = handlerInput.requestEnvelope;
     const attributes = handlerInput.attributesManager.getSessionAttributes();
-    const res = require('../resources')(event.request.locale);
 
     // Simple - welcome them to the game and have them bet
     let speech;

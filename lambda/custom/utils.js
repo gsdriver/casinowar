@@ -32,13 +32,11 @@ module.exports = {
     module.exports.shuffleDeck(newGame, event.session.user.userId);
     attributes[attributes.currentGame] = newGame;
   },
-  readLeaderBoard: function(handlerInput) {
+  async readLeaderBoard(handlerInput) {
     const event = handlerInput.requestEnvelope;
     const attributes = handlerInput.attributesManager.getSessionAttributes();
     const game = attributes[attributes.currentGame];
-    const res = require('./resources')(event.request.locale);
     let leaderURL = process.env.SERVICEURL + 'war/leaders';
-    let speech = '';
     const params = {};
 
     params.userId = event.session.user.userId;
@@ -57,30 +55,10 @@ module.exports = {
         timeout: 1000,
       }
     ).then((body) => {
-      const leaders = JSON.parse(body);
-
-      if (!leaders.count || !leaders.top) {
-        // Something went wrong
-        speech = res.strings.LEADER_NO_SCORES;
-      } else {
-        if (leaders.rank) {
-          speech += res.strings.LEADER_BANKROLL_RANKING
-            .replace('{0}', game.bankroll)
-            .replace('{1}', leaders.rank)
-            .replace('{2}', roundPlayers(event, leaders.count));
-        }
-
-        // And what is the leader board?
-        let topScores = leaders.top;
-        topScores = topScores.map((x) => res.strings.LEADER_BANKROLL_FORMAT.replace('{0}', x));
-        speech += res.strings.LEADER_TOP_BANKROLLS.replace('{0}', topScores.length);
-        speech += speechUtils.and(topScores, {locale: event.request.locale, pause: '300ms'});
-      }
-
-      return speech;
+      return JSON.parse(body);
     }).catch((err) => {
       console.log(err);
-      return res.strings.LEADER_NO_SCORES;
+      return undefined;
     });
   },
   shuffleDeck: function(game, userId) {
@@ -114,11 +92,16 @@ module.exports = {
     console.log('Shuffle took ' + (Date.now() - start) + ' ms');
   },
   async sayCard(handlerInput, card) {
-    voicehub.setLocale(handlerInput);
-    const post = await voicehub
-      .intent('Utilities')
-      .post('CardName')
-      .get();
+    const attributes = handlerInput.attributesManager.getSessionAttributes();
+
+    if (!attributes.temp.cards) {
+      voicehub.setLocale(handlerInput);
+      const post = await voicehub
+        .intent('Utilities')
+        .post('CardName')
+        .get();
+      attributes.temp.cards = post.card.map((x) => x.replace('<speak>', '').replace('</speak>', ''));
+    }
 
     let index = card.rank % 13;
     if (index === 0) {
@@ -127,8 +110,7 @@ module.exports = {
     index += ('CDHS'.indexOf(card.suit) * 13);
     index--;
 
-    console.log(card, index, post.card[index].replace('<speak>', '').replace('</speak>', ''));
-    return post.card[index].replace('<speak>', '').replace('</speak>', '');
+    return attributes.temp.cards[index];
   },
   async readHand(handlerInput, readBankroll) {
     let speech = '';
@@ -189,8 +171,8 @@ module.exports = {
       dealerPost = 'DealerCard';
     }
 
-    const card1 = await module.exports.sayCard(event, playerCard);
-    const card2 = await module.exports.sayCard(event, dealerCard);
+    const card1 = await module.exports.sayCard(handlerInput, playerCard);
+    const card2 = await module.exports.sayCard(handlerInput, dealerCard);
 
     const playerText = await voicehub
       .intent('Utilities')
@@ -346,13 +328,3 @@ module.exports = {
     }
   },
 };
-
-function roundPlayers(event, playerCount) {
-  const res = require('./resources')(event.request.locale);
-  if (playerCount < 200) {
-    return playerCount;
-  } else {
-    // "Over" to the nearest hundred
-    return res.strings.MORE_THAN_PLAYERS.replace('{0}', 100 * Math.floor(playerCount / 100));
-  }
-}

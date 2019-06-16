@@ -5,6 +5,7 @@
 'use strict';
 
 const utils = require('../utils');
+const voicehub = require('@voicehub/voicehub')(process.env.VOICEHUB_APPID, process.env.VOICEHUB_APIKEY);
 
 module.exports = {
   canHandle(handlerInput) {
@@ -14,19 +15,19 @@ module.exports = {
     return (utils.atWar(attributes) && (request.type === 'IntentRequest')
       && (request.intent.name === 'AMAZON.YesIntent'));
   },
-  handle: function(handlerInput) {
+  async handle(handlerInput) {
     const event = handlerInput.requestEnvelope;
     const attributes = handlerInput.attributesManager.getSessionAttributes();
-    const res = require('../resources')(event.request.locale);
     const game = attributes[attributes.currentGame];
 
     // OK, deal one more card - player wins on ties
     let reprompt;
-    let speech;
+    let dealtCards = ' ';
+    let postName;
 
+    voicehub.setLocale(handlerInput);
     if (game.bankroll < game.bet) {
-      speech = res.strings.WAR_NOT_ENOUGH;
-      reprompt = res.strings.WAR_NOT_ENOUGH_REPROMPT;
+      postName = 'NotEnough';
     } else {
       if (!game.wars) {
         game.wars = {};
@@ -41,30 +42,36 @@ module.exports = {
       game.bankroll -= game.bet;
       game.player.push(game.deck.shift());
       game.dealer.push(game.deck.shift());
-      speech = utils.sayDealtCards(event, attributes, game.player[1], game.dealer[1]);
+      dealtCards = await utils.sayDealtCards(handlerInput, game.player[1], game.dealer[1]);
 
       // OK, who won (player wins ties)
       if (game.player[1].rank >= game.dealer[1].rank) {
         // You won!
         if ((game.player[1].rank == game.dealer[1].rank) &&
             game.rules.tieBonus) {
-          speech += res.strings.WAR_TIE_WINNER.replace('{0}', (1 + game.rules.tieBonus) * game.bet);
+          postName = 'WarTieWinner';
           game.bankroll += (3 + game.rules.tieBonus) * game.bet;
         } else {
-          speech += res.strings.BET_WINNER;
+          postName = 'WarWinner';
           game.bankroll += 3 * game.bet;
         }
       } else {
-        speech += res.strings.BET_LOSER;
+        postName = 'WarLoser';
       }
-
-      reprompt = res.strings.BET_PLAY_AGAIN;
-      speech += reprompt;
     }
 
+    const post = await voicehub
+      .intent('WarIntent')
+      .post(postName)
+      .withParameters({
+        dealtcards: dealtCards,
+        tiebonus: (1 + game.rules.tieBonus) * game.bet,
+      })
+      .get();
+
     return handlerInput.responseBuilder
-      .speak(speech)
-      .reprompt(reprompt)
+      .speak(post.speech)
+      .reprompt(post.reprompt)
       .getResponse();
   },
 };

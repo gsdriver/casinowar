@@ -5,6 +5,7 @@
 'use strict';
 
 const utils = require('../utils');
+const voicehub = require('@voicehub/voicehub')(process.env.VOICEHUB_APPID, process.env.VOICEHUB_APIKEY);
 
 module.exports = {
   canHandle(handlerInput) {
@@ -14,14 +15,13 @@ module.exports = {
     return (utils.atWar(attributes) && (request.type === 'IntentRequest')
       && (request.intent.name === 'AMAZON.NoIntent'));
   },
-  handle: function(handlerInput) {
+  async handle(handlerInput) {
     const event = handlerInput.requestEnvelope;
     const attributes = handlerInput.attributesManager.getSessionAttributes();
-    const res = require('../resources')(event.request.locale);
     const game = attributes[attributes.currentGame];
-    let speech;
-    const reprompt = res.strings.BET_PLAY_AGAIN;
+    let postName;
 
+    voicehub.setLocale(handlerInput);
     if (!game.wars) {
       game.wars = {};
     }
@@ -30,16 +30,24 @@ module.exports = {
     // You lose half your bet
     game.bankroll += Math.floor(game.bet / 2);
     game.specialState = 'surrender';
-    speech = res.strings.WAR_SURRENDER;
     if ((game.bankroll < game.rules.minBet) && game.rules.canReset) {
       game.bankroll = game.startingBankroll;
-      speech += res.strings.RESET_BANKROLL.replace('{0}', game.bankroll);
+      postName = 'WarResetBankroll';
+    } else {
+      postName = 'WarSurrender';
     }
 
-    speech += reprompt;
+    const post = await voicehub
+      .intent('WarIntent')
+      .post(postName)
+      .withParameters({
+        bankroll: game.bankroll,
+      })
+      .get();
+
     return handlerInput.responseBuilder
-      .speak(speech)
-      .reprompt(reprompt)
+      .speak(post.speech)
+      .reprompt(post.reprompt)
       .getResponse();
   },
 };

@@ -70,7 +70,8 @@ module.exports = {
       // If the side bet was placed, let them know it won
       // We have 6 audio files to choose from
       const warSounds = parseInt(process.env.WARCOUNT);
-      let warSound = '';
+      let warSound = ' ';
+      let sideBetWin = ' ';
       postName = 'War';
       if (!isNaN(warSounds) && !attributes.bot) {
         const randomValue = seedrandom(event.session.user.userId + (game.timestamp ? game.timestamp : ''))();
@@ -78,13 +79,14 @@ module.exports = {
         if (choice > warSounds) {
           choice--;
         }
-        warSound = `<audio src="https://s3-us-west-2.amazonaws.com/alexasoundclips/war/war${choice}.mp3"/>`;
+        postParams.warsound = `<audio src="https://s3-us-west-2.amazonaws.com/alexasoundclips/war/war${choice}.mp3"/>`;
         postName += 'Sound';
       }
 
       if (sideBetPlaced) {
         postName += 'SideBet';
         game.bankroll += 10 * game.sideBet;
+        sideBetWin = 10 * game.sideBet;
       }
 
       post = await voicehub
@@ -92,7 +94,7 @@ module.exports = {
         .post(postName)
         .withParameters({
           warsound: warSound,
-          sidebet: 10 * game.sideBet,
+          sidebet: sideBetWin,
         })
         .get();
     } else {
