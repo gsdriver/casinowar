@@ -45,7 +45,7 @@
             "codeUri": "lambda/custom",
             "functionName": "CasinoWar3",
             "handler": "index.handler",
-            "revisionId": "5a2729c3-cd6e-4d19-9d87-54077a897f49",
+            "revisionId": "acafbf58-114c-4e2b-ad24-61c0e2616636",
             "runtime": "nodejs10.x"
           }
         ]
