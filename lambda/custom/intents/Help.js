@@ -16,6 +16,7 @@ module.exports = {
   async handle(handlerInput) {
     const event = handlerInput.requestEnvelope;
     const attributes = handlerInput.attributesManager.getSessionAttributes();
+    const game = attributes[attributes.currentGame];
 
     voicehub.setLocale(handlerInput);
     if (attributes.bot) {
@@ -28,9 +29,7 @@ module.exports = {
         .speak(post.speech)
         .reprompt(post.reprompt)
         .getResponse();
-    } else {
-      const game = attributes[attributes.currentGame];
-
+    } else if (game.dealer.length && game.player.length) {
       const hand = await utils.readHand(handlerInput, true);
       const help = await voicehub
         .intent('AMAZON.HelpIntent')
@@ -46,6 +45,22 @@ module.exports = {
       return handlerInput.responseBuilder
         .speak(help.speech)
         .reprompt(hand.reprompt)
+        .withSimpleCard(help.cardtitle.replace('<speak>', '').replace('</speak>', ''),
+          help.cardtext.replace('<speak>', '').replace('</speak>', ''))
+        .getResponse();
+    } else {
+      const help = await voicehub
+        .intent('AMAZON.HelpIntent')
+        .post('HelpResponseNoHand')
+        .withParameters({
+          minbet: game.rules.minBet,
+          maxbet: game.rules.maxBet,
+        })
+        .get();
+
+      return handlerInput.responseBuilder
+        .speak(help.speech)
+        .reprompt(help.reprompt)
         .withSimpleCard(help.cardtitle.replace('<speak>', '').replace('</speak>', ''),
           help.cardtext.replace('<speak>', '').replace('</speak>', ''))
         .getResponse();
