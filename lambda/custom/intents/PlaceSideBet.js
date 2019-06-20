@@ -16,13 +16,12 @@ module.exports = {
       && (request.intent.name === 'PlaceSideBetIntent'));
   },
   async handle(handlerInput) {
-    const event = handlerInput.requestEnvelope;
     const attributes = handlerInput.attributesManager.getSessionAttributes();
 
     // The bet amount is optional - if not present we will use a default value
     // of either the last bet amount or the minimum bet
     voicehub.setLocale(handlerInput);
-    const output = await utils.getBetAmount(event, attributes);
+    const output = await utils.getBetAmount(handlerInput, attributes);
     if (output.speech) {
       return handlerInput.responseBuilder
         .speak(output.speech)

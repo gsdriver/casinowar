@@ -16,7 +16,6 @@ module.exports = {
       && (request.intent.name === 'RemoveSideBetIntent'));
   },
   async handle(handlerInput) {
-    const event = handlerInput.requestEnvelope;
     const attributes = handlerInput.attributesManager.getSessionAttributes();
     const game = attributes[attributes.currentGame];
 

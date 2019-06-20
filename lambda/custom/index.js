@@ -67,6 +67,23 @@ const saveResponseInterceptor = {
 
     if (response) {
       return utils.drawTable(handlerInput).then(() => {
+        if (response.outputSpeech && response.outputSpeech.ssml) {
+          // First, strip out all <speak> and </speak> since Voicehub puts these into all
+          // retrieved content.  Then add it back in.
+          response.outputSpeech.ssml = response.outputSpeech.ssml.replace(/<speak>/g, '').replace(/<\/speak>/g, '');
+          response.outputSpeech.ssml = '<speak>' + response.outputSpeech.ssml + '</speak>';
+        }
+        if (response.reprompt && response.reprompt.ssml) {
+          // First, strip out all <speak> and </speak> since Voicehub puts these into all
+          // retrieved content.  Then add it back in.
+          response.reprompt.ssml = response.reprompt.ssml.replace(/<speak>/g, '').replace(/<\/speak>/g, '');
+          response.reprompt.ssml = '<speak>' + response.reprompt.ssml + '</speak>';
+        }
+
+        if (!process.env.NOLOG) {
+          console.log(JSON.stringify(response));
+        }
+
         if (response.shouldEndSession) {
           // We are meant to end the session
           SessionEnd.handle(handlerInput);

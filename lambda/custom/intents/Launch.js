@@ -24,7 +24,7 @@ module.exports = {
     // If we're at war, we need to read the hand as well
     let handText = ' ';
     let reprompt;
-    if (!utils.atWar(attributes)) {
+    if (utils.atWar(attributes)) {
       // Read the hand as well
       const hand = await utils.readHand(handlerInput, false);
       handText = hand.speech;
@@ -44,7 +44,7 @@ module.exports = {
 
     reprompt = reprompt || post.reprompt;
     return handlerInput.responseBuilder
-      .speak(post.speech)
+      .speak(post.speech + reprompt)
       .reprompt(reprompt)
       .getResponse();
   },

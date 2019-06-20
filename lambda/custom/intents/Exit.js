@@ -53,7 +53,7 @@ module.exports = {
         .intent('AMAZON.CancelIntent')
         .post('Exit')
         .withParameters({
-          ad: adText,
+          ad: (adText.length ? adText : ' '),
         })
         .get();
 

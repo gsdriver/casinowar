@@ -30,7 +30,7 @@ module.exports = {
         .withParameters({
           bet: game.bet,
           sidebet: game.sideBet,
-          hand: hand.speech + hand.reprompt,
+          hand: hand.speech + ' ' + hand.reprompt,
         })
         .get();
 

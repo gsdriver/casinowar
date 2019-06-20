@@ -79,8 +79,9 @@ module.exports = {
         if (choice > warSounds) {
           choice--;
         }
-        postParams.warsound = `<audio src="https://s3-us-west-2.amazonaws.com/alexasoundclips/war/war${choice}.mp3"/>`;
-        postName += 'Sound';
+        warSound = `<audio src="https://s3-us-west-2.amazonaws.com/alexasoundclips/war/war${choice}.mp3"/>`;
+      } else {
+        postName += 'NoSound';
       }
 
       if (sideBetPlaced) {

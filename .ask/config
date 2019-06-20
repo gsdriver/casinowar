@@ -16,7 +16,7 @@
       },
       "resources": {
         "manifest": {
-          "eTag": "0f208cbd6f1583a731aa0a5c91437b41"
+          "eTag": "c07b4b71647858dc4d16d987f87796b1"
         },
         "interactionModel": {
           "en-AU": {
@@ -37,16 +37,13 @@
         },
         "lambda": [
           {
+            "arn": "arn:aws:lambda:us-east-1:129065607926:function:CasinoWar3",
+            "functionName": "arn:aws:lambda:us-east-1:129065607926:function:CasinoWar3",
+            "awsRegion": "us-east-1",
             "alexaUsage": [
               "custom/default"
             ],
-            "arn": "arn:aws:lambda:us-east-1:129065607926:function:CasinoWar3",
-            "awsRegion": "us-east-1",
-            "codeUri": "lambda/custom",
-            "functionName": "CasinoWar3",
-            "handler": "index.handler",
-            "revisionId": "acafbf58-114c-4e2b-ad24-61c0e2616636",
-            "runtime": "nodejs10.x"
+            "revisionId": "40481aaf-9eb6-4d43-965e-f0e82683ded6"
           }
         ]
       }
