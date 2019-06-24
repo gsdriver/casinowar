@@ -112,15 +112,19 @@ module.exports = {
       if ((game.bankroll < game.rules.minBet) && game.rules.canReset) {
         game.bankroll = game.startingBankroll;
         postName = 'BetBankrupt';
+        post = await voicehub
+          .intent('BetIntent')
+          .post(postName)
+          .withParameters({
+            bankroll: game.bankroll,
+          })
+          .get();
+      } else {
+        post = await voicehub
+          .intent('BetIntent')
+          .post(postName)
+          .get();
       }
-
-      post = await voicehub
-        .intent('BetIntent')
-        .post(postName)
-        .withParameters({
-          bankroll: game.bankroll,
-        })
-        .get();
     }
 
     return handlerInput.responseBuilder

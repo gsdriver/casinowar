@@ -38,12 +38,12 @@ module.exports = {
           minbet: game.rules.minBet,
           maxbet: game.rules.maxBet,
           handtext: hand.speech,
-          handreprompt: hand.reprompt,
+          handreprompt: ' ',
         })
         .get();
 
       return handlerInput.responseBuilder
-        .speak(help.speech)
+        .speak(help.speech + hand.reprompt)
         .reprompt(hand.reprompt)
         .withSimpleCard(help.cardtitle.replace('<speak>', '').replace('</speak>', ''),
           help.cardtext.replace('<speak>', '').replace('</speak>', ''))

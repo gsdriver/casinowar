@@ -21,6 +21,7 @@ const Unhandled = require('./intents/Unhandled');
 const utils = require('./utils');
 const request = require('request');
 const ssmlCheck = require('ssml-check-core');
+const voicehub = require('@voicehub/voicehub')(process.env.VOICEHUB_APPID, process.env.VOICEHUB_APIKEY);
 
 const requestInterceptor = {
   process(handlerInput) {
@@ -171,7 +172,9 @@ function runGame(event, context, callback) {
     )
     .addErrorHandlers(ErrorHandler)
     .addRequestInterceptors(requestInterceptor)
-    .addResponseInterceptors(saveResponseInterceptor)
+    .addResponseInterceptors(saveResponseInterceptor, (req, res) => {
+      voicehub.interactionInterceptor(req, res);
+    })
     .withPersistenceAdapter(dbAdapter)
     .withApiClient(new Alexa.DefaultApiClient())
     .withSkillId('amzn1.ask.skill.af231135-5719-460a-85cc-af8b684c6069')

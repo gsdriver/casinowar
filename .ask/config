@@ -37,13 +37,16 @@
         },
         "lambda": [
           {
-            "arn": "arn:aws:lambda:us-east-1:129065607926:function:CasinoWar3",
-            "functionName": "arn:aws:lambda:us-east-1:129065607926:function:CasinoWar3",
-            "awsRegion": "us-east-1",
             "alexaUsage": [
               "custom/default"
             ],
-            "revisionId": "fe7b9f46-e2e7-4bea-8aec-f689c7ea0484"
+            "arn": "arn:aws:lambda:us-east-1:129065607926:function:CasinoWar3",
+            "awsRegion": "us-east-1",
+            "codeUri": "lambda/custom",
+            "functionName": "arn:aws:lambda:us-east-1:129065607926:function:CasinoWar3",
+            "handler": "index.handler",
+            "revisionId": "5f129de7-a283-4d5d-b8a9-b142469e71cc",
+            "runtime": "nodejs8.10"
           }
         ]
       }

@@ -120,6 +120,7 @@ module.exports = {
     let postName;
     let playerCard;
     let dealerCard;
+    const speechParams = {};
 
     // Post to read depends on whether to read bankroll
     // and whether they are at war or not\
@@ -134,16 +135,15 @@ module.exports = {
     }
 
     voicehub.setLocale(handlerInput);
-    const card1 = await module.exports.sayCard(handlerInput, playerCard);
-    const card2 = await module.exports.sayCard(handlerInput, dealerCard);
+    speechParams.playercard = await module.exports.sayCard(handlerInput, playerCard);
+    speechParams.dealercard = await module.exports.sayCard(handlerInput, dealerCard);
+    if (readBankroll) {
+      speechParams.bankroll = game.bankroll;
+    }
     const post = await voicehub
       .intent('Utilities')
       .post(postName)
-      .withParameters({
-        Bankroll: game.bankroll,
-        PlayerCard: card1,
-        DealerCard: card2,
-      })
+      .withParameters(speechParams)
       .get();
 
     const s = post.speech.replace('<speak>', '').replace('</speak>', '');
@@ -281,7 +281,7 @@ module.exports = {
     const event = handlerInput.requestEnvelope;
     const attributes = handlerInput.attributesManager.getSessionAttributes();
 
-    if (event.context && event.context.System &&
+    if (attributes.temp && event.context && event.context.System &&
       event.context.System.device &&
       event.context.System.device.supportedInterfaces &&
       event.context.System.device.supportedInterfaces.Display) {
