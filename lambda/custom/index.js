@@ -100,7 +100,7 @@ if (process.env.DASHBOTKEY) {
 }
 
 function runGame(event, context, callback) {
-  const skillBuilder = Alexa.SkillBuilders.standard();
+  const skillBuilder = Alexa.SkillBuilders.custom();
 
   if (!process.env.NOLOG) {
     console.log(JSON.stringify(event));
@@ -112,6 +112,12 @@ function runGame(event, context, callback) {
     return;
   }
 
+  const {DynamoDbPersistenceAdapter} = require('ask-sdk-dynamodb-persistence-adapter');
+  const dbAdapter = new DynamoDbPersistenceAdapter({
+    tableName: 'War',
+    partitionKeyName: 'userId',
+    attributesName: 'mapAttr',
+  });
   const skillFunction = skillBuilder.addRequestHandlers(
       Launch,
       HighScore,
@@ -129,12 +135,11 @@ function runGame(event, context, callback) {
     .addErrorHandlers(ErrorHandler)
     .addRequestInterceptors(requestInterceptor)
     .addResponseInterceptors(saveResponseInterceptor)
-    .withTableName('War')
-    .withAutoCreateTable(true)
+    .withPersistenceAdapter(dbAdapter)
+    .withApiClient(new Alexa.DefaultApiClient())
     .withSkillId('amzn1.ask.skill.af231135-5719-460a-85cc-af8b684c6069')
     .lambda();
   skillFunction(event, context, (err, response) => {
     callback(err, response);
   });
 }
-
